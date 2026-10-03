@@ -25,7 +25,12 @@ impl OutputOptions {
 }
 
 const PADDING: usize = 3;
-const DEFAULT_COLUMNS: &[Column] = &[
+const COLUMNS: &[Column] = &[
+    Column {
+        kind: ColumnKind::Index,
+        alignment: Alignment::Right,
+        width: 0,
+    },
     Column {
         kind: ColumnKind::Name,
         alignment: Alignment::Left,
@@ -42,7 +47,17 @@ const DEFAULT_COLUMNS: &[Column] = &[
         width: 0,
     },
     Column {
+        kind: ColumnKind::AccessTime,
+        alignment: Alignment::Left,
+        width: 0,
+    },
+    Column {
         kind: ColumnKind::ModifiedTime,
+        alignment: Alignment::Left,
+        width: 0,
+    },
+    Column {
+        kind: ColumnKind::CreatedTime,
         alignment: Alignment::Left,
         width: 0,
     },
@@ -58,6 +73,15 @@ const DEFAULT_COLUMNS: &[Column] = &[
     },
 ];
 
+const SHORT_COLS: &[ColumnKind] = &[
+    ColumnKind::Index,
+    ColumnKind::Name,
+    ColumnKind::Size,
+    ColumnKind::ModifiedTime,
+];
+
+const LONG_COLS: &[ColumnKind] = &[ColumnKind::Permissions, ColumnKind::Owner];
+
 #[allow(dead_code)]
 #[derive(Clone, Copy)]
 struct Column {
@@ -67,9 +91,9 @@ struct Column {
 }
 
 impl Column {
-    pub fn value(&self, entry: &DirEntry) -> String {
+    pub fn value(&self, entry: &DirEntry, index: Option<usize>) -> String {
         match self.kind {
-            ColumnKind::Index => "0".to_string(),
+            ColumnKind::Index => index.map(|i| i.to_string()).unwrap_or_default(),
             ColumnKind::Name => entry.name().to_string(),
             ColumnKind::Kind => format_kind(entry.kind()).to_string(),
             ColumnKind::Size => format_size(entry.size()).to_string(),
@@ -107,18 +131,17 @@ enum Alignment {
 pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
     let entries = filter_entries(entries, options);
     let mut table = String::new();
-    let mut columns = DEFAULT_COLUMNS.to_vec();
-    columns = filter_columns(columns, options);
+    let mut columns = build_columns(options);
 
     // TODO: optimize
-    for entry in &entries {
+    for (i, entry) in entries.iter().enumerate() {
         for col in &mut columns {
-            col.width = col.width.max(col.value(&entry).len());
+            col.width = col.width.max(col.value(&entry, Some(i + 1)).len());
         }
     }
-    for entry in &entries {
+    for (i, entry) in entries.iter().enumerate() {
         for col in &columns {
-            let str_val = col.value(&entry);
+            let str_val = col.value(&entry, Some(i + 1));
             let formatted = if col.alignment == Alignment::Right {
                 format!("{:>width$}", str_val, width = col.width)
             } else {
@@ -140,20 +163,14 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
     table
 }
 
-fn filter_columns(columns: Vec<Column>, options: &OutputOptions) -> Vec<Column> {
-    if !options.all && !options.long {
-        columns
-            .into_iter()
-            .filter(|col| {
-                matches!(
-                    col.kind,
-                    ColumnKind::Name | ColumnKind::Size | ColumnKind::ModifiedTime
-                )
-            })
-            .collect()
-    } else {
-        columns
-    }
+fn build_columns(options: &OutputOptions) -> Vec<Column> {
+    COLUMNS
+        .iter()
+        .copied()
+        .filter(|col| {
+            SHORT_COLS.contains(&col.kind) || (options.long && LONG_COLS.contains(&col.kind))
+        })
+        .collect()
 }
 
 fn filter_entries(e: Vec<DirEntry>, options: &OutputOptions) -> Vec<DirEntry> {
