@@ -127,6 +127,14 @@ pub fn format_kind(kind: std::fs::FileType) -> &'static str {
     }
 }
 
+macro_rules! format_plural {
+    ($secs:expr, $unit:expr, $unit_str:expr) => {{
+        let count = $secs / $unit;
+        let plural = if count == 1 { "" } else { "s" };
+        format!("{} {}{} ago", count, $unit_str, plural)
+    }};
+}
+
 pub fn format_time(time: std::time::SystemTime) -> String {
     let ago = match time.elapsed() {
         Ok(elapsed) => elapsed.as_secs(),
@@ -140,15 +148,14 @@ pub fn format_time(time: std::time::SystemTime) -> String {
     // TODO: count years properly
     const YEAR: u64 = MONTH * 12;
 
-    // TODO: fix "1 minutes ago" situations
     match ago {
         0..MINUTE => "just now".to_string(),
-        MINUTE..HOUR => format!("{} minutes ago", ago / MINUTE),
-        HOUR..DAY => format!("{} hours ago", ago / HOUR),
-        DAY..WEEK => format!("{} days ago", ago / DAY),
-        WEEK..MONTH => format!("{} weeks ago", ago / WEEK),
-        MONTH..YEAR => format!("{} months ago", ago / MONTH),
-        YEAR.. => format!("{} years ago", ago / YEAR),
+        MINUTE..HOUR => format_plural!(ago, MINUTE, "minute"),
+        HOUR..DAY => format_plural!(ago, HOUR, "hour"),
+        DAY..WEEK => format_plural!(ago, DAY, "day"),
+        WEEK..MONTH => format_plural!(ago, WEEK, "week"),
+        MONTH..YEAR => format_plural!(ago, MONTH, "month"),
+        YEAR.. => format_plural!(ago, YEAR, "year"),
     }
 }
 
