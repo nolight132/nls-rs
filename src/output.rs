@@ -10,7 +10,6 @@ use crate::{
 #[allow(dead_code)]
 pub struct OutputOptions {
     pub all: bool,
-    pub one: bool,
     pub plain: bool,
     pub long: bool,
 }
@@ -19,14 +18,24 @@ impl OutputOptions {
     pub fn from(args: &Args) -> Self {
         Self {
             all: args.all,
-            one: args.one || args._1,
             plain: args.plain,
             long: args.long || args.all,
         }
     }
 }
 
-const PADDING: usize = 3;
+const PADDING: usize = 1;
+
+const BORDER_TOP_LEFT: &str = "╭";
+const BORDER_TOP_RIGHT: &str = "╮";
+const BORDER_TOP_MIDDLE: &str = "┬";
+const BORDER_BOTTOM_LEFT: &str = "╰";
+const BORDER_BOTTOM_RIGHT: &str = "╯";
+const BORDER_BOTTOM_MIDDLE: &str = "┴";
+const BORDER_HORIZONTAL: &str = "─";
+const BORDER_VERTICAL: &str = "│";
+const _BORDER_CROSS: &str = "┼";
+
 const COLUMNS: &[Column] = &[
     Column {
         kind: ColumnKind::Index,
@@ -130,6 +139,11 @@ enum Alignment {
     Center,
 }
 
+enum Edge {
+    Top,
+    Bottom,
+}
+
 pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
     let entries = filter_entries(entries, options);
     let mut table = String::new();
@@ -143,8 +157,14 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
             ));
         }
     }
+
+    write_edge(&mut table, &columns, Edge::Top);
     for (i, entry) in entries.iter().enumerate() {
-        for col in &columns {
+        table.push_str(BORDER_VERTICAL);
+        for (j, col) in columns.iter().enumerate() {
+            for _ in 0..PADDING {
+                table.push(' ');
+            }
             let str_val = col.value(&entry, Some(i + 1));
             let formatted = if col.alignment == Alignment::Right {
                 format!("{:>width$}", str_val, width = col.width)
@@ -156,15 +176,41 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
             for _ in 0..PADDING {
                 table.push(' ');
             }
+            if j < columns.len() - 1 {
+                table.push_str(BORDER_VERTICAL);
+            }
         }
-        if !options.one {
-            table.push('\n');
-        }
-    }
-    if options.one {
+        table.push_str(BORDER_VERTICAL);
         table.push('\n');
     }
+    write_edge(&mut table, &columns, Edge::Bottom);
     table
+}
+
+fn write_edge(table: &mut String, columns: &[Column], edge: Edge) {
+    match edge {
+        Edge::Top => table.push_str(BORDER_TOP_LEFT),
+        Edge::Bottom => table.push_str(BORDER_BOTTOM_LEFT),
+    }
+    for (i, col) in columns.iter().enumerate() {
+        for j in 0..(col.width + PADDING * 2) {
+            table.push_str(BORDER_HORIZONTAL);
+            if j == col.width + PADDING * 2 - 1 {
+                if i < columns.len() - 1 {
+                    match edge {
+                        Edge::Top => table.push_str(BORDER_TOP_MIDDLE),
+                        Edge::Bottom => table.push_str(BORDER_BOTTOM_MIDDLE),
+                    }
+                } else {
+                    match edge {
+                        Edge::Top => table.push_str(BORDER_TOP_RIGHT),
+                        Edge::Bottom => table.push_str(BORDER_BOTTOM_RIGHT),
+                    }
+                }
+            }
+        }
+    }
+    table.push('\n');
 }
 
 fn build_columns(options: &OutputOptions) -> Vec<Column> {
