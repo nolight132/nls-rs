@@ -1,3 +1,5 @@
+use unicode_width::UnicodeWidthStr;
+
 use crate::{
     cli::Args,
     format::{format_kind, format_permissions, format_size, format_time},
@@ -136,7 +138,9 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
     // TODO: optimize
     for (i, entry) in entries.iter().enumerate() {
         for col in &mut columns {
-            col.width = col.width.max(col.value(&entry, Some(i + 1)).len());
+            col.width = col.width.max(UnicodeWidthStr::width(
+                col.value(&entry, Some(i + 1)).as_str(),
+            ));
         }
     }
     for (i, entry) in entries.iter().enumerate() {
