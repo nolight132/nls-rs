@@ -1,15 +1,16 @@
 use clap::Parser;
 
-use crate::{format::format_table, list::stat_dir};
+use crate::{list::stat_dir, output::build_table};
 
 mod cli;
 mod format;
 mod list;
+mod output;
 
 fn main() {
     let args = cli::Args::parse();
-    let options = format::FormatOptions::from(&args);
+    let options = output::OutputOptions::from(&args);
     let contents = stat_dir(&args.path).expect("failed to stat");
 
-    print!("{}", format_table(contents, &options));
+    print!("{}", build_table(contents, &options));
 }
