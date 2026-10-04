@@ -1,39 +1,35 @@
-use std::{
-    fs,
-    os::unix::fs::MetadataExt,
-    path::{Path, PathBuf},
-};
-use uzers::{Users, UsersCache, get_user_by_uid};
+use std::{fs, os::unix::fs::MetadataExt, path::Path, time::UNIX_EPOCH};
+
+use uzers::{Users, UsersCache};
+
+use crate::cli::Args;
 
 #[derive(Debug)]
-pub struct DirEntry {
+pub struct Entry {
     name: String,
-    path: PathBuf,
-    kind: fs::FileType,
-    size: u64,
-    permissions: fs::Permissions,
-    access_time: std::time::SystemTime,
-    modified_time: std::time::SystemTime,
-    created_time: std::time::SystemTime,
-    owner: String,
+    kind: Option<fs::FileType>,
+    size: Option<u64>,
+    permissions: Option<fs::Permissions>,
+    access_time: Option<std::time::SystemTime>,
+    modified_time: Option<std::time::SystemTime>,
+    created_time: Option<std::time::SystemTime>,
+    owner: Option<String>,
 }
 
 #[allow(dead_code)]
-impl DirEntry {
+impl Entry {
     pub fn new(
         name: String,
-        path: PathBuf,
-        kind: fs::FileType,
-        size: u64,
-        permissions: fs::Permissions,
-        access_time: std::time::SystemTime,
-        modified_time: std::time::SystemTime,
-        created_time: std::time::SystemTime,
-        owner: String,
+        kind: Option<fs::FileType>,
+        size: Option<u64>,
+        permissions: Option<fs::Permissions>,
+        access_time: Option<std::time::SystemTime>,
+        modified_time: Option<std::time::SystemTime>,
+        created_time: Option<std::time::SystemTime>,
+        owner: Option<String>,
     ) -> Self {
         Self {
             name,
-            path,
             kind,
             size,
             permissions,
@@ -44,63 +40,120 @@ impl DirEntry {
         }
     }
 
-    pub fn name(&self) -> &str {
-        &self.name
+    pub fn name(&self) -> Option<&str> {
+        Some(&self.name)
     }
-    pub fn path(&self) -> &PathBuf {
-        &self.path
-    }
-    pub fn kind(&self) -> fs::FileType {
+    pub fn kind(&self) -> Option<fs::FileType> {
         self.kind
     }
-    pub fn size(&self) -> u64 {
+    pub fn size(&self) -> Option<u64> {
         self.size
     }
-    pub fn permissions(&self) -> fs::Permissions {
+    pub fn permissions(&self) -> Option<fs::Permissions> {
         self.permissions.clone()
     }
-    pub fn access_time(&self) -> std::time::SystemTime {
+    pub fn access_time(&self) -> Option<std::time::SystemTime> {
         self.access_time
     }
-    pub fn modified_time(&self) -> std::time::SystemTime {
+    pub fn modified_time(&self) -> Option<std::time::SystemTime> {
         self.modified_time
     }
-    pub fn created_time(&self) -> std::time::SystemTime {
+    pub fn created_time(&self) -> Option<std::time::SystemTime> {
         self.created_time
     }
-    pub fn owner(&self) -> &str {
-        &self.owner
+    pub fn owner(&self) -> Option<&str> {
+        self.owner.as_deref()
     }
 }
 
-pub fn stat_dir(path: &Path) -> std::io::Result<Vec<DirEntry>> {
-    let cache = UsersCache::new();
-    let _ = cache.get_current_uid();
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Property {
+    Name,
+    Kind,
+    Size,
+    Permissions,
+    AccessTime,
+    ModifiedTime,
+    CreatedTime,
+    Owner,
+}
 
-    std::fs::read_dir(path)?
+#[derive(Default)]
+#[allow(dead_code)]
+pub struct ListOptions {
+    pub all: bool,
+    pub plain: bool,
+    pub long: bool,
+}
+
+impl ListOptions {
+    pub fn from(args: &Args) -> Self {
+        Self {
+            all: args.all,
+            plain: args.plain,
+            long: args.long || args.all,
+        }
+    }
+
+    fn needs_metadata(&self, properties: &[Property]) -> bool {
+        properties.contains(&Property::Size)
+            || properties.contains(&Property::ModifiedTime)
+            || properties.contains(&Property::AccessTime)
+            || properties.contains(&Property::CreatedTime)
+            || properties.contains(&Property::Kind)
+            || properties.contains(&Property::Owner)
+    }
+}
+
+pub fn stat_dir(
+    path: &Path,
+    properties: &[Property],
+    options: &ListOptions,
+) -> std::io::Result<Vec<Entry>> {
+    let cache = UsersCache::new();
+
+    let entries: Vec<Entry> = std::fs::read_dir(path)?
         .map(|entry| {
             let entry = entry?;
-            let metadata = entry.metadata()?;
-            Ok(DirEntry::new(
+            let needs_metadata = options.needs_metadata(properties);
+            let metadata = if needs_metadata {
+                Some(entry.metadata()?)
+            } else {
+                None
+            };
+            Ok(Entry::new(
                 entry.file_name().to_string_lossy().into_owned(),
-                entry.path(),
-                metadata.file_type(),
-                metadata.len(),
-                metadata.permissions(),
+                metadata.as_ref().map(|m| m.file_type()),
+                metadata.as_ref().map(|m| m.size()),
+                metadata.as_ref().map(|m| m.permissions()),
                 metadata
-                    .accessed()
-                    .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
+                    .as_ref()
+                    .map(|m| m.accessed().unwrap_or(UNIX_EPOCH)),
                 metadata
-                    .modified()
-                    .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
+                    .as_ref()
+                    .map(|m| m.modified().unwrap_or(UNIX_EPOCH)),
+                metadata.as_ref().map(|m| m.created().unwrap_or(UNIX_EPOCH)),
                 metadata
-                    .created()
-                    .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
-                match cache.get_user_by_uid(metadata.uid()) {
-                    Some(user) => user.name().to_string_lossy().to_string(),
-                    None => "unknown".to_string(),
-                },
+                    .as_ref()
+                    .map(|m| match cache.get_user_by_uid(m.uid()) {
+                        Some(user) => user.name().to_string_lossy().into_owned(),
+                        None => "unknown".to_string(),
+                    }),
             ))
+        })
+        .collect::<std::io::Result<Vec<_>>>()?;
+
+    Ok(filter_entries(entries, options))
+}
+
+fn filter_entries(e: Vec<Entry>, options: &ListOptions) -> Vec<Entry> {
+    e.into_iter()
+        .filter(|entry| {
+            if options.all {
+                true
+            } else {
+                !entry.name().unwrap_or_default().starts_with(".")
+            }
         })
         .collect()
 }
