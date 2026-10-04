@@ -16,7 +16,13 @@ fn main() {
     let options = ListOptions::from(&args);
     let columns: Vec<Column> = view::columns(&options);
     let properties: Vec<Property> = columns.iter().filter_map(Column::property).collect();
-    let entries = stat_dir(&args.path, &properties, &options).expect("failed to stat");
+    let entries = match stat_dir(&args.path, &properties, &options) {
+        Ok(entries) => entries,
+        Err(e) => {
+            eprintln!("{}", e);
+            return;
+        }
+    };
     let table = Table::new(entries, columns);
 
     println!("{}", output::build_table(&table));
