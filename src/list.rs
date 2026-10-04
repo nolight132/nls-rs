@@ -3,7 +3,7 @@ use std::{
     os::unix::fs::MetadataExt,
     path::{Path, PathBuf},
 };
-use uzers::get_user_by_uid;
+use uzers::{Users, UsersCache, get_user_by_uid};
 
 #[derive(Debug)]
 pub struct DirEntry {
@@ -74,6 +74,9 @@ impl DirEntry {
 }
 
 pub fn stat_dir(path: &Path) -> std::io::Result<Vec<DirEntry>> {
+    let cache = UsersCache::new();
+    let _ = cache.get_current_uid();
+
     std::fs::read_dir(path)?
         .map(|entry| {
             let entry = entry?;
@@ -93,7 +96,7 @@ pub fn stat_dir(path: &Path) -> std::io::Result<Vec<DirEntry>> {
                 metadata
                     .created()
                     .unwrap_or(std::time::SystemTime::UNIX_EPOCH),
-                match get_user_by_uid(metadata.uid()) {
+                match cache.get_user_by_uid(metadata.uid()) {
                     Some(user) => user.name().to_string_lossy().to_string(),
                     None => "unknown".to_string(),
                 },
