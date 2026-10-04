@@ -2,7 +2,7 @@ use unicode_width::UnicodeWidthStr;
 
 use crate::{
     cli::Args,
-    format::{format_kind, format_permissions, format_size, format_time},
+    format::{PermissionFormat, format_kind, format_permissions, format_size, format_time},
     list::DirEntry,
 };
 
@@ -111,7 +111,9 @@ impl Column {
             ColumnKind::AccessTime => format_time(entry.access_time()).to_string(),
             ColumnKind::ModifiedTime => format_time(entry.modified_time()).to_string(),
             ColumnKind::CreatedTime => format_time(entry.created_time()).to_string(),
-            ColumnKind::Permissions => format_permissions(entry.permissions()).to_string(),
+            ColumnKind::Permissions => {
+                format_permissions(entry.permissions(), PermissionFormat::Symbolic).to_string()
+            }
             ColumnKind::Owner => entry.owner().to_string(),
         }
     }

@@ -57,6 +57,37 @@ pub fn format_time(time: std::time::SystemTime) -> String {
     }
 }
 
-pub fn format_permissions(permissions: std::fs::Permissions) -> String {
-    format!("{:o}", permissions.mode() & 0o777)
+pub enum PermissionFormat {
+    Octal,
+    Symbolic,
+}
+
+pub fn format_permissions(permissions: std::fs::Permissions, format: PermissionFormat) -> String {
+    match format {
+        PermissionFormat::Octal => format!("{:o}", permissions.mode() & 0o777),
+        PermissionFormat::Symbolic => format_symbolic_permissions(permissions),
+    }
+}
+
+fn format_symbolic_permissions(permissions: std::fs::Permissions) -> String {
+    let mode = permissions.mode() & 0o777;
+    let mut result = String::new();
+
+    result.push_str(&format_symbolic_permission(mode, 0o400, 'r'));
+    result.push_str(&format_symbolic_permission(mode, 0o200, 'w'));
+    result.push_str(&format_symbolic_permission(mode, 0o100, 'x'));
+    result.push_str(&format_symbolic_permission(mode, 0o040, 'r'));
+    result.push_str(&format_symbolic_permission(mode, 0o020, 'w'));
+    result.push_str(&format_symbolic_permission(mode, 0o010, 'x'));
+    result.push_str(&format_symbolic_permission(mode, 0o004, 'r'));
+    result.push_str(&format_symbolic_permission(mode, 0o002, 'w'));
+    result.push_str(&format_symbolic_permission(mode, 0o001, 'x'));
+    result
+}
+
+fn format_symbolic_permission(mode: u32, mask: u32, char: char) -> String {
+    match mode & mask {
+        0 => "-".to_string(),
+        _ => char.to_string(),
+    }
 }
