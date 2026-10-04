@@ -5,6 +5,7 @@ use crate::{
     format::{PermissionFormat, format_kind, format_permissions, format_size, format_time},
     list::DirEntry,
 };
+use std::fmt::Write;
 
 #[derive(Default)]
 #[allow(dead_code)]
@@ -151,7 +152,6 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
     let mut table = String::new();
     let mut columns = build_columns(options);
 
-    // TODO: optimize
     for (i, entry) in entries.iter().enumerate() {
         for col in &mut columns {
             col.width = col.width.max(UnicodeWidthStr::width(
@@ -168,13 +168,12 @@ pub fn build_table(entries: Vec<DirEntry>, options: &OutputOptions) -> String {
                 table.push(' ');
             }
             let str_val = col.value(&entry, Some(i + 1));
-            let formatted = if col.alignment == Alignment::Right {
-                format!("{:>width$}", str_val, width = col.width)
+            if col.alignment == Alignment::Right {
+                write!(table, "{:>width$}", str_val, width = col.width).unwrap();
             } else {
-                format!("{:<width$}", str_val, width = col.width)
-            };
+                write!(table, "{:<width$}", str_val, width = col.width).unwrap();
+            }
 
-            table.push_str(&formatted);
             for _ in 0..PADDING {
                 table.push(' ');
             }
