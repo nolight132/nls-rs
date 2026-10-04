@@ -10,11 +10,7 @@ pub struct Args {
     pub all: bool,
 
     /// One line output
-    #[arg(short)]
-    pub _1: bool,
-
-    /// One line output
-    #[arg(long)]
+    #[arg(short = '1', long = "one")]
     pub one: bool,
 
     /// Path to list
