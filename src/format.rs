@@ -1,3 +1,5 @@
+//! Utility module providing functions for formatting file system data.
+
 use std::os::unix::fs::PermissionsExt;
 
 pub fn format_size(size: u64) -> String {
