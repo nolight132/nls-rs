@@ -2,7 +2,7 @@ use std::{fs, os::unix::fs::MetadataExt, path::Path, time::UNIX_EPOCH};
 
 use uzers::{Users, UsersCache};
 
-use crate::cli::Args;
+use crate::{cli::Args, config::Config, format::TimeFormat};
 
 #[derive(Debug)]
 pub struct Entry {
@@ -84,14 +84,16 @@ pub struct ListOptions {
     pub all: bool,
     pub plain: bool,
     pub long: bool,
+    pub time_format: TimeFormat,
 }
 
 impl ListOptions {
-    pub fn from(args: &Args) -> Self {
+    pub fn from(args: &Args, config: &Config) -> Self {
         Self {
             all: args.all,
             plain: args.plain,
             long: args.long || args.all,
+            time_format: config.time_format,
         }
     }
 

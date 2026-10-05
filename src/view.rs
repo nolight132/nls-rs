@@ -44,10 +44,10 @@ pub fn columns(options: &ListOptions) -> Vec<Column> {
 }
 
 impl Column {
-    pub fn value(&self, entry: &Entry, row: usize) -> Option<String> {
+    pub fn value(&self, entry: &Entry, row: usize, options: &ListOptions) -> Option<String> {
         match self {
             Column::Index => Some((row + 1).to_string()),
-            Column::Property(property) => property_value(*property, entry),
+            Column::Property(property) => property_value(*property, entry, options),
         }
     }
 
@@ -59,14 +59,20 @@ impl Column {
     }
 }
 
-fn property_value(property: Property, entry: &Entry) -> Option<String> {
+fn property_value(property: Property, entry: &Entry, options: &ListOptions) -> Option<String> {
     match property {
         Property::Name => entry.name().map(str::to_owned),
         Property::Kind => entry.kind().map(|k| format_kind(k).to_owned()),
         Property::Size => entry.size().map(format_size),
-        Property::AccessTime => entry.access_time().map(format_time),
-        Property::ModifiedTime => entry.modified_time().map(format_time),
-        Property::CreatedTime => entry.created_time().map(format_time),
+        Property::AccessTime => entry
+            .access_time()
+            .map(|t| format_time(t, options.time_format)),
+        Property::ModifiedTime => entry
+            .modified_time()
+            .map(|t| format_time(t, options.time_format)),
+        Property::CreatedTime => entry
+            .created_time()
+            .map(|t| format_time(t, options.time_format)),
         Property::Owner => entry.owner().map(str::to_owned),
         Property::Permissions => entry
             .permissions()

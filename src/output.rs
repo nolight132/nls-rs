@@ -1,5 +1,5 @@
 use crate::{
-    list::Property,
+    list::{ListOptions, Property},
     view::{Column, Table},
 };
 use std::fmt::Write;
@@ -39,15 +39,15 @@ enum Edge {
     Bottom,
 }
 
-pub fn build_table(table: &Table) -> String {
+pub fn build_table(table: &Table, options: &ListOptions) -> String {
     let mut output = String::new();
-    let widths = widths(table);
+    let widths = widths(table, options);
     let alignments = alignments(table);
 
     output.push_str(&build_edge(&table.columns(), &widths, Edge::Top));
     for (i, row) in table.rows().iter().enumerate() {
         for (j, column) in table.columns().iter().enumerate() {
-            let value = column.value(row, i).unwrap_or(MISSING.to_string());
+            let value = column.value(row, i, options).unwrap_or(MISSING.to_string());
 
             output.push_str(BORDER_VERTICAL);
             output.push_str(&" ".repeat(PADDING));
@@ -69,7 +69,7 @@ pub fn build_table(table: &Table) -> String {
     output
 }
 
-fn widths(table: &Table) -> Vec<usize> {
+fn widths(table: &Table, options: &ListOptions) -> Vec<usize> {
     table
         .columns()
         .iter()
@@ -78,7 +78,10 @@ fn widths(table: &Table) -> Vec<usize> {
                 .rows()
                 .iter()
                 .enumerate()
-                .map(|(j, entry)| col.value(entry, j).map_or(MISSING.width(), |v| v.width()))
+                .map(|(j, entry)| {
+                    col.value(entry, j, options)
+                        .map_or(MISSING.width(), |v| v.width())
+                })
                 .max()
                 .unwrap_or_default()
         })

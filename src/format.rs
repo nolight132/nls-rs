@@ -1,6 +1,8 @@
 //! Utility module providing functions for formatting file system data.
 
-use std::os::unix::fs::PermissionsExt;
+use std::{os::unix::fs::PermissionsExt, time::SystemTime};
+
+use chrono::{DateTime, Utc};
 
 pub fn format_size(size: u64) -> String {
     let mut size = size as f64;
@@ -35,11 +37,24 @@ macro_rules! format_plural {
     }};
 }
 
-pub fn format_time(time: std::time::SystemTime) -> String {
+#[derive(Debug, Clone, Copy, Default)]
+pub enum TimeFormat {
+    #[default]
+    Relative,
+    Absolute,
+}
+
+pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
+    if let TimeFormat::Absolute = format {
+        let time: DateTime<Utc> = time.into();
+        return time.format("%b%e %H:%M").to_string();
+    }
+
     let ago = match time.elapsed() {
         Ok(elapsed) => elapsed.as_secs(),
         Err(_) => return "unknown".to_string(),
     };
+
     const MINUTE: u64 = 60;
     const HOUR: u64 = 60 * 60;
     const DAY: u64 = HOUR * 24;
