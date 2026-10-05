@@ -37,8 +37,15 @@ pub fn columns(options: &ListOptions) -> Vec<Column> {
         Column::Index,
         Column::Property(Property::Name),
         Column::Property(Property::Size),
-        Column::Property(Property::Permissions),
+        Column::Property(Property::ModifiedTime),
     ];
+
+    if options.long {
+        columns.extend(vec![
+            Column::Property(Property::Permissions),
+            Column::Property(Property::Owner),
+        ]);
+    }
     // read from config, fall back to these defaults
     columns
 }
