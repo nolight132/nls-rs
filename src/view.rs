@@ -25,7 +25,6 @@ impl Table {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Clone)]
 pub enum Column {
     Index,

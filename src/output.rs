@@ -18,7 +18,6 @@ const BORDER_HORIZONTAL: &str = "─";
 const BORDER_VERTICAL: &str = "│";
 const _BORDER_CROSS: &str = "┼";
 
-#[allow(dead_code)]
 #[derive(PartialEq, Eq, Clone, Copy)]
 enum Alignment {
     Left,

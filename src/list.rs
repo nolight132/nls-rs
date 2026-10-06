@@ -20,7 +20,6 @@ pub struct Entry {
     owner: Option<String>,
 }
 
-#[allow(dead_code)]
 impl Entry {
     pub fn new(
         name: String,
@@ -83,10 +82,8 @@ pub enum Property {
 }
 
 #[derive(Default)]
-#[allow(dead_code)]
 pub struct ListOptions {
     pub all: bool,
-    pub plain: bool,
     pub long: bool,
     pub time_format: TimeFormat,
     pub permission_format: PermissionFormat,
@@ -96,7 +93,6 @@ impl ListOptions {
     pub fn from(args: &Args, config: &Config) -> Self {
         Self {
             all: args.all,
-            plain: args.plain,
             long: args.long || args.all,
             time_format: config.time_format,
             permission_format: config.permission_format,
