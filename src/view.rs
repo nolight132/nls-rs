@@ -1,5 +1,5 @@
 use crate::{
-    format::{PermissionFormat, format_kind, format_permissions, format_size, format_time},
+    format::{format_kind, format_permissions, format_size, format_time},
     list::{Entry, ListOptions, Property},
 };
 
@@ -83,7 +83,7 @@ fn property_value(property: Property, entry: &Entry, options: &ListOptions) -> O
         Property::Owner => entry.owner().map(str::to_owned),
         Property::Permissions => entry
             .permissions()
-            .map(|p| format_permissions(p, PermissionFormat::Symbolic)),
+            .map(|p| format_permissions(p, options.permission_format)),
     }
 }
 

@@ -74,9 +74,16 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
     }
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PermissionFormat {
     Octal,
     Symbolic,
+}
+
+impl Default for PermissionFormat {
+    fn default() -> Self {
+        Self::Symbolic
+    }
 }
 
 pub fn format_permissions(permissions: std::fs::Permissions, format: PermissionFormat) -> String {

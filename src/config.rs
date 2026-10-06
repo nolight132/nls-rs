@@ -16,7 +16,7 @@ impl Default for Config {
         Self {
             short_cols: Vec::new(),
             long_cols: Vec::new(),
-            permission_format: PermissionFormat::Octal,
+            permission_format: PermissionFormat::Symbolic,
             time_format: TimeFormat::Relative,
         }
     }
