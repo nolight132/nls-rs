@@ -169,3 +169,42 @@ fn filter_entries(e: ReadDir, options: &ListOptions) -> io::Result<Vec<DirEntry>
     })
     .collect()
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn stat_dir_empty() {
+        let path = Path::new("/tmp/empty_test");
+        fs::create_dir(path).ok();
+
+        let properties = &[Property::Name];
+        let entries = stat_dir(path, properties, &ListOptions::default()).unwrap();
+
+        assert!(entries.is_empty());
+        fs::remove_dir(path).ok();
+    }
+
+    #[test]
+    fn stat_dir_non_empty() {
+        let path = Path::new("/tmp/non_empty_test");
+        fs::File::create(path.join("test.txt")).ok();
+        fs::create_dir(path).ok();
+
+        let properties = &[Property::Name];
+        let entries = stat_dir(path, properties, &ListOptions::default()).unwrap();
+
+        assert!(!entries.is_empty());
+        fs::remove_dir(path).ok();
+    }
+
+    #[test]
+    fn stat_dir_non_existent() {
+        let path = Path::new("/tmp/non_existent_test");
+        let properties = &[Property::Name];
+        let entries = stat_dir(path, properties, &ListOptions::default());
+
+        assert!(entries.is_err());
+    }
+}
