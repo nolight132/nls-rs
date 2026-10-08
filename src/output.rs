@@ -2,7 +2,7 @@ use crate::{
     list::{ListOptions, Property},
     view::{Column, Table},
 };
-use std::fmt::Write;
+use std::{borrow::Cow, fmt::Write, iter::repeat_n};
 use unicode_width::UnicodeWidthStr;
 
 const MISSING: &str = "-";
@@ -40,16 +40,35 @@ enum Edge {
 
 pub fn build_table(table: &Table, options: &ListOptions) -> String {
     let mut output = String::new();
-    let widths = widths(table, options);
+    let mut values: Vec<Cow<str>> = Vec::new();
+    let widths: Vec<usize> = table
+        .columns()
+        .iter()
+        .enumerate()
+        .map(|(i, col)| {
+            table
+                .rows()
+                .iter()
+                .enumerate()
+                .map(|(j, entry)| {
+                    values.push(col.value(entry, j, options).unwrap_or(MISSING.into()));
+                    values[i * table.rows().len() + j].width()
+                })
+                .max()
+                .unwrap_or_default()
+        })
+        .collect();
+
     let alignments = alignments(table);
 
     output.push_str(&build_edge(&table.columns(), &widths, Edge::Top));
-    for (i, row) in table.rows().iter().enumerate() {
-        for (j, column) in table.columns().iter().enumerate() {
-            let value = column.value(row, i, options).unwrap_or(MISSING.into());
+    for i in 0..table.rows().len() {
+        for j in 0..table.columns().len() {
+            // i and j are swapped here, reversed order
+            let value = &values[j * table.rows().len() + i];
 
             output.push_str(BORDER_VERTICAL);
-            output.push_str(&" ".repeat(PADDING));
+            output.extend(repeat_n(' ', PADDING));
 
             match alignments[j] {
                 Alignment::Left => write!(output, "{:<width$}", value, width = widths[j]),
@@ -57,7 +76,7 @@ pub fn build_table(table: &Table, options: &ListOptions) -> String {
                 Alignment::Right => write!(output, "{:>width$}", value, width = widths[j]),
             }
             .unwrap_or_default();
-            output.push_str(&" ".repeat(PADDING));
+            output.extend(repeat_n(' ', PADDING));
         }
 
         output.push_str(BORDER_VERTICAL);
@@ -66,25 +85,6 @@ pub fn build_table(table: &Table, options: &ListOptions) -> String {
     output.push_str(&build_edge(&table.columns(), &widths, Edge::Bottom));
 
     output
-}
-
-fn widths(table: &Table, options: &ListOptions) -> Vec<usize> {
-    table
-        .columns()
-        .iter()
-        .map(|col| {
-            table
-                .rows()
-                .iter()
-                .enumerate()
-                .map(|(j, entry)| {
-                    col.value(entry, j, options)
-                        .map_or(MISSING.width(), |v| v.width())
-                })
-                .max()
-                .unwrap_or_default()
-        })
-        .collect()
 }
 
 fn alignments(table: &Table) -> Vec<Alignment> {
