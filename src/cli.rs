@@ -3,7 +3,7 @@ use std::path::PathBuf;
 
 /// Simple program to list files
 #[derive(Parser, Debug)]
-#[command(version, about, long_about = None)]
+#[command(version, about, long_about = None, disable_version_flag = true)]
 pub struct Args {
     /// List all files
     #[arg(short, long)]
@@ -24,4 +24,8 @@ pub struct Args {
     /// Long output
     #[arg(short, long)]
     pub long: bool,
+
+    /// Version
+    #[arg(short, long)]
+    pub version: bool,
 }

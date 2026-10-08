@@ -93,6 +93,7 @@ pub struct ListOptions {
     pub long: bool,
     pub time_format: TimeFormat,
     pub permission_format: PermissionFormat,
+    pub version: bool,
 }
 
 impl ListOptions {
@@ -102,6 +103,7 @@ impl ListOptions {
             long: args.long || args.all,
             time_format: config.time_format,
             permission_format: config.permission_format,
+            version: args.version,
         }
     }
 
