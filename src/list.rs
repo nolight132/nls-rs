@@ -49,8 +49,8 @@ impl Entry {
         }
     }
 
-    pub fn name(&self) -> Option<&str> {
-        Some(&self.name)
+    pub fn name(&self) -> &str {
+        self.name.as_str()
     }
     pub fn kind(&self) -> Option<fs::FileType> {
         self.kind

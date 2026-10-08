@@ -1,3 +1,5 @@
+use std::borrow::Cow;
+
 use crate::{
     format::{format_kind, format_permissions, format_size, format_time},
     list::{Entry, ListOptions, Property},
@@ -50,10 +52,17 @@ pub fn columns(options: &ListOptions) -> Vec<Column> {
 }
 
 impl Column {
-    pub fn value(&self, entry: &Entry, row: usize, options: &ListOptions) -> Option<String> {
+    pub fn value<'a>(
+        &self,
+        entry: &'a Entry,
+        row: usize,
+        options: &ListOptions,
+    ) -> Option<Cow<'a, str>> {
         match self {
-            Column::Index => Some((row + 1).to_string()),
-            Column::Property(property) => property_value(*property, entry, options),
+            Column::Index => Some((row + 1).to_string().into()),
+            Column::Property(property) => {
+                property_value(property, entry, options).map(|v| v.into())
+            }
         }
     }
 
@@ -65,24 +74,28 @@ impl Column {
     }
 }
 
-fn property_value(property: Property, entry: &Entry, options: &ListOptions) -> Option<String> {
+fn property_value<'a>(
+    property: &Property,
+    entry: &'a Entry,
+    options: &ListOptions,
+) -> Option<Cow<'a, str>> {
     match property {
-        Property::Name => entry.name().map(str::to_owned),
-        Property::Kind => entry.kind().map(|k| format_kind(k).to_owned()),
-        Property::Size => entry.size().map(format_size),
+        Property::Name => Some(entry.name().into()),
+        Property::Kind => entry.kind().map(|k| format_kind(k).into()),
+        Property::Size => entry.size().map(|s| format_size(s).into()),
         Property::AccessTime => entry
             .access_time()
-            .map(|t| format_time(t, options.time_format)),
+            .map(|t| format_time(t, options.time_format).into()),
         Property::ModifiedTime => entry
             .modified_time()
-            .map(|t| format_time(t, options.time_format)),
+            .map(|t| format_time(t, options.time_format).into()),
         Property::CreatedTime => entry
             .created_time()
-            .map(|t| format_time(t, options.time_format)),
-        Property::Owner => entry.owner().map(str::to_owned),
+            .map(|t| format_time(t, options.time_format).into()),
+        Property::Owner => entry.owner().map(|o| o.into()),
         Property::Permissions => entry
             .permissions()
-            .map(|p| format_permissions(p, options.permission_format)),
+            .map(|p| format_permissions(p, options.permission_format).into()),
     }
 }
 

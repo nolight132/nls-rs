@@ -46,7 +46,7 @@ pub fn build_table(table: &Table, options: &ListOptions) -> String {
     output.push_str(&build_edge(&table.columns(), &widths, Edge::Top));
     for (i, row) in table.rows().iter().enumerate() {
         for (j, column) in table.columns().iter().enumerate() {
-            let value = column.value(row, i, options).unwrap_or(MISSING.to_string());
+            let value = column.value(row, i, options).unwrap_or(MISSING.into());
 
             output.push_str(BORDER_VERTICAL);
             output.push_str(&" ".repeat(PADDING));
