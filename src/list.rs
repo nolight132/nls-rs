@@ -1,4 +1,10 @@
-use std::{fs, os::unix::fs::MetadataExt, path::Path, time::UNIX_EPOCH};
+use std::{
+    fs::{self, DirEntry, ReadDir},
+    io,
+    os::unix::fs::MetadataExt,
+    path::Path,
+    time::UNIX_EPOCH,
+};
 
 use uzers::{Users, UsersCache};
 
@@ -116,9 +122,9 @@ pub fn stat_dir(
 ) -> std::io::Result<Vec<Entry>> {
     let cache = UsersCache::new();
 
-    let entries: Vec<Entry> = std::fs::read_dir(path)?
+    let entries = filter_entries(std::fs::read_dir(path)?, options)?
+        .into_iter()
         .map(|entry| {
-            let entry = entry?;
             let needs_metadata = options.needs_metadata(properties);
             let metadata = if needs_metadata {
                 Some(entry.metadata()?)
@@ -147,17 +153,19 @@ pub fn stat_dir(
         })
         .collect::<std::io::Result<Vec<_>>>()?;
 
-    Ok(filter_entries(entries, options))
+    Ok(entries)
 }
 
-fn filter_entries(e: Vec<Entry>, options: &ListOptions) -> Vec<Entry> {
-    e.into_iter()
-        .filter(|entry| {
-            if options.all {
-                true
-            } else {
-                !entry.name().unwrap_or_default().starts_with(".")
-            }
-        })
-        .collect()
+fn filter_entries(e: ReadDir, options: &ListOptions) -> io::Result<Vec<DirEntry>> {
+    e.filter(|entry| {
+        let entry = match entry {
+            Ok(entry) => entry,
+            Err(_) => return true,
+        };
+        match options.all {
+            true => true,
+            false => !entry.file_name().to_string_lossy().starts_with("."),
+        }
+    })
+    .collect()
 }
