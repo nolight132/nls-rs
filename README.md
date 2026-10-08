@@ -3,6 +3,7 @@
 # nls
 
 ### neo-ls: a modern `ls` with useful tables
+</div>
 
 > [!NOTE]
 > This is an ongoing Rust rewrite of [nls](https://github.com/nolight132/nls).
