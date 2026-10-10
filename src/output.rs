@@ -54,12 +54,7 @@ pub fn build_table(table: &Table, options: &Options) -> String {
             output.push_str(BORDER_VERTICAL);
             output.extend(repeat_n(' ', PADDING));
 
-            match alignments[j] {
-                Alignment::Left => write!(output, "{:<width$}", value, width = widths[j]),
-                Alignment::Center => write!(output, "{:^width$}", value, width = widths[j]),
-                Alignment::Right => write!(output, "{:>width$}", value, width = widths[j]),
-            }
-            .unwrap_or_default();
+            write_aligned(&mut output, value, widths[j], alignments[j]);
             output.extend(repeat_n(' ', PADDING));
         }
 
@@ -71,21 +66,31 @@ pub fn build_table(table: &Table, options: &Options) -> String {
     output
 }
 
+fn write_aligned(output: &mut String, value: &str, width: usize, alignment: Alignment) {
+    match alignment {
+        Alignment::Left => write!(output, "{:<width$}", value, width = width),
+        Alignment::Center => write!(output, "{:^width$}", value, width = width),
+        Alignment::Right => write!(output, "{:>width$}", value, width = width),
+    }
+    .unwrap_or_default();
+}
+
 fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<usize>) {
     let mut values: Vec<Cow<str>> = Vec::new();
 
     let table = table
         .columns()
         .iter()
-        .enumerate()
-        .map(|(i, col)| {
+        .map(|col| {
             table
                 .rows()
                 .iter()
                 .enumerate()
                 .map(|(j, entry)| {
-                    values.push(col.value(entry, j, options).unwrap_or(MISSING.into()));
-                    values[i * table.rows().len() + j].width()
+                    let value = col.value(entry, j, options).unwrap_or(MISSING.into());
+                    let width = value.width();
+                    values.push(value);
+                    width
                 })
                 .max()
                 .unwrap_or_default()
