@@ -1,8 +1,9 @@
 use std::borrow::Cow;
 
 use crate::{
+    config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
-    list::{Entry, ListOptions, Property},
+    list::{Entry, Property},
 };
 
 pub struct Table {
@@ -33,7 +34,7 @@ pub enum Column {
     Property(Property),
 }
 
-pub fn columns(options: &ListOptions) -> Vec<Column> {
+pub fn columns(options: &Options) -> Vec<Column> {
     let mut columns = vec![
         Column::Index,
         Column::Property(Property::Name),
@@ -56,7 +57,7 @@ impl Column {
         &self,
         entry: &'a Entry,
         row: usize,
-        options: &ListOptions,
+        options: &Options,
     ) -> Option<Cow<'a, str>> {
         match self {
             Column::Index => Some((row + 1).to_string().into()),
@@ -77,7 +78,7 @@ impl Column {
 fn property_value<'a>(
     property: &Property,
     entry: &'a Entry,
-    options: &ListOptions,
+    options: &Options,
 ) -> Option<Cow<'a, str>> {
     match property {
         Property::Name => Some(entry.name().into()),

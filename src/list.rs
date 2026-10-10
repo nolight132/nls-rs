@@ -10,7 +10,7 @@ use uzers::{Users, UsersCache};
 
 use crate::{
     cli::Args,
-    config::Config,
+    config::{Config, Options},
     format::{PermissionFormat, TimeFormat},
 };
 
@@ -87,40 +87,10 @@ pub enum Property {
     Owner,
 }
 
-#[derive(Default)]
-pub struct ListOptions {
-    pub all: bool,
-    pub long: bool,
-    pub time_format: TimeFormat,
-    pub permission_format: PermissionFormat,
-    pub version: bool,
-}
-
-impl ListOptions {
-    pub fn from(args: &Args, config: &Config) -> Self {
-        Self {
-            all: args.all,
-            long: args.long || args.all,
-            time_format: config.time_format,
-            permission_format: config.permission_format,
-            version: args.version,
-        }
-    }
-
-    fn needs_metadata(&self, properties: &[Property]) -> bool {
-        properties.contains(&Property::Size)
-            || properties.contains(&Property::ModifiedTime)
-            || properties.contains(&Property::AccessTime)
-            || properties.contains(&Property::CreatedTime)
-            || properties.contains(&Property::Kind)
-            || properties.contains(&Property::Owner)
-    }
-}
-
 pub fn stat_dir(
     path: &Path,
     properties: &[Property],
-    options: &ListOptions,
+    options: &Options,
 ) -> std::io::Result<Vec<Entry>> {
     let cache = UsersCache::new();
 
@@ -158,7 +128,7 @@ pub fn stat_dir(
     Ok(entries)
 }
 
-fn filter_entries(e: ReadDir, options: &ListOptions) -> io::Result<Vec<DirEntry>> {
+fn filter_entries(e: ReadDir, options: &Options) -> io::Result<Vec<DirEntry>> {
     e.filter(|entry| {
         let entry = match entry {
             Ok(entry) => entry,
@@ -182,7 +152,7 @@ mod test {
         fs::create_dir(path).ok();
 
         let properties = &[Property::Name];
-        let entries = stat_dir(path, properties, &ListOptions::default()).unwrap();
+        let entries = stat_dir(path, properties, &Options::default()).unwrap();
 
         assert!(entries.is_empty());
         fs::remove_dir(path).ok();
@@ -195,7 +165,7 @@ mod test {
         fs::create_dir(path).ok();
 
         let properties = &[Property::Name];
-        let entries = stat_dir(path, properties, &ListOptions::default()).unwrap();
+        let entries = stat_dir(path, properties, &Options::default()).unwrap();
 
         assert!(!entries.is_empty());
         fs::remove_dir(path).ok();
@@ -205,7 +175,7 @@ mod test {
     fn stat_dir_non_existent() {
         let path = Path::new("/tmp/non_existent_test");
         let properties = &[Property::Name];
-        let entries = stat_dir(path, properties, &ListOptions::default());
+        let entries = stat_dir(path, properties, &Options::default());
 
         assert!(entries.is_err());
     }

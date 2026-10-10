@@ -1,5 +1,6 @@
 use crate::{
-    list::{ListOptions, Property},
+    config::Options,
+    list::Property,
     view::{Column, Table},
 };
 use std::{borrow::Cow, fmt::Write, iter::repeat_n};
@@ -38,7 +39,7 @@ enum Edge {
     Bottom,
 }
 
-pub fn build_table(table: &Table, options: &ListOptions) -> String {
+pub fn build_table(table: &Table, options: &Options) -> String {
     let mut output = String::new();
     let (values, widths) = prepare(table, options);
 
@@ -70,7 +71,7 @@ pub fn build_table(table: &Table, options: &ListOptions) -> String {
     output
 }
 
-fn prepare<'a>(table: &'a Table, options: &ListOptions) -> (Vec<Cow<'a, str>>, Vec<usize>) {
+fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<usize>) {
     let mut values: Vec<Cow<str>> = Vec::new();
 
     let table = table

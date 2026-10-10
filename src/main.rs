@@ -1,7 +1,8 @@
 use clap::Parser;
 
 use crate::{
-    list::{ListOptions, Property, stat_dir},
+    config::Options,
+    list::{Property, stat_dir},
     view::{Column, Table},
 };
 
@@ -15,7 +16,7 @@ mod view;
 fn main() {
     let args = cli::Args::parse();
     let config = config::Config::default();
-    let options = ListOptions::from(&args, &config);
+    let options = Options::from(&args, &config);
     if options.version {
         println!(
             r#" _   _ _     ____
