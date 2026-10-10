@@ -34,24 +34,6 @@ pub enum Column {
     Property(Property),
 }
 
-pub fn columns(options: &Options) -> Vec<Column> {
-    let mut columns = vec![
-        Column::Index,
-        Column::Property(Property::Name),
-        Column::Property(Property::Size),
-        Column::Property(Property::ModifiedTime),
-    ];
-
-    if options.long {
-        columns.extend(vec![
-            Column::Property(Property::Permissions),
-            Column::Property(Property::Owner),
-        ]);
-    }
-    // read from config, fall back to these defaults
-    columns
-}
-
 impl Column {
     pub fn value<'a>(
         &self,
@@ -73,6 +55,31 @@ impl Column {
             Column::Property(property) => Some(*property),
         }
     }
+
+    pub fn header(&self) -> &str {
+        match self {
+            Column::Index => "#",
+            Column::Property(property) => property.header(),
+        }
+    }
+}
+
+pub fn columns(options: &Options) -> Vec<Column> {
+    let mut columns = vec![
+        Column::Index,
+        Column::Property(Property::Name),
+        Column::Property(Property::Size),
+        Column::Property(Property::ModifiedTime),
+    ];
+
+    if options.long {
+        columns.extend(vec![
+            Column::Property(Property::Permissions),
+            Column::Property(Property::Owner),
+        ]);
+    }
+    // read from config, fall back to these defaults
+    columns
 }
 
 fn property_value<'a>(

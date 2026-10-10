@@ -17,7 +17,9 @@ const BORDER_BOTTOM_RIGHT: &str = "╯";
 const BORDER_BOTTOM_MIDDLE: &str = "┴";
 const BORDER_HORIZONTAL: &str = "─";
 const BORDER_VERTICAL: &str = "│";
-const _BORDER_CROSS: &str = "┼";
+const BORDER_CROSS: &str = "┼";
+const BORDER_CROSS_LEFT: &str = "├";
+const BORDER_CROSS_RIGHT: &str = "┤";
 
 #[derive(PartialEq, Eq, Clone, Copy)]
 enum Alignment {
@@ -34,6 +36,7 @@ fn alignment(col: &Column) -> Alignment {
     }
 }
 
+#[derive(PartialEq, Eq, Clone, Copy)]
 enum Edge {
     Top,
     Bottom,
@@ -125,6 +128,31 @@ fn build_edge(table: &Table, widths: &[usize], edge: Edge) -> String {
         Edge::Top => output.push_str(&BORDER_TOP_RIGHT),
         Edge::Bottom => output.push_str(&BORDER_BOTTOM_RIGHT),
     }
+    output.push('\n');
+
+    if edge == Edge::Bottom {
+        return output;
+    }
+
+    output.push_str(&BORDER_VERTICAL);
+
+    for (i, col) in table.columns().iter().enumerate() {
+        output.extend(repeat_n(' ', PADDING));
+        write_aligned(&mut output, col.header(), widths[i], Alignment::Center);
+        output.extend(repeat_n(' ', PADDING));
+        output.push_str(&BORDER_VERTICAL);
+    }
+    output.push('\n');
+
+    output.push_str(&BORDER_CROSS_LEFT);
+
+    for i in 0..table.columns().len() {
+        output.push_str(&BORDER_HORIZONTAL.repeat(widths[i] + PADDING * 2));
+        if i < table.columns().len() - 1 {
+            output.push_str(&BORDER_CROSS);
+        }
+    }
+    output.push_str(&BORDER_CROSS_RIGHT);
     output.push('\n');
 
     output

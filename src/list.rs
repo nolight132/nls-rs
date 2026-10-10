@@ -87,6 +87,21 @@ pub enum Property {
     Owner,
 }
 
+impl Property {
+    pub fn header(&self) -> &str {
+        match self {
+            Property::Name => "name",
+            Property::Kind => "kind",
+            Property::Size => "size",
+            Property::Permissions => "permissions",
+            Property::AccessTime => "access",
+            Property::ModifiedTime => "modified",
+            Property::CreatedTime => "created",
+            Property::Owner => "owner",
+        }
+    }
+}
+
 pub fn stat_dir(
     path: &Path,
     properties: &[Property],
