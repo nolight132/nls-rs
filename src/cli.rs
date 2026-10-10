@@ -43,13 +43,15 @@ pub fn handle(args: &Args) {
 
     if options.version {
         println!(
-            r#" _   _ _     ____
+            r#"
+ _   _ _     ____
 | \ | | |   / ___|
 |  \| | |   \___ \
 |   | | |___ ___) |
 |   |_|_____|____/  by nolight132
 
-version 0.1.0"#
+v{}"#,
+            env!("CARGO_PKG_VERSION")
         );
         return;
     }
