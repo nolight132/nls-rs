@@ -64,22 +64,26 @@ impl Column {
     }
 }
 
-pub fn columns(options: &Options) -> Vec<Column> {
-    let mut columns = vec![
-        Column::Index,
-        Column::Property(Property::Name),
-        Column::Property(Property::Size),
-        Column::Property(Property::ModifiedTime),
-    ];
-
-    if options.long {
-        columns.extend(vec![
-            Column::Property(Property::Permissions),
-            Column::Property(Property::Owner),
-        ]);
+impl From<Property> for Column {
+    fn from(p: Property) -> Self {
+        Self::Property(p)
     }
-    // read from config, fall back to these defaults
-    columns
+}
+
+pub fn columns(options: &Options) -> Vec<Column> {
+    use Property::*;
+
+    // Property columns
+    let mut props = vec![Name, Size, ModifiedTime];
+    if options.long {
+        props.extend([Permissions, Owner]);
+    }
+
+    // Virtual columns
+    [Column::Index]
+        .into_iter()
+        .chain(props.into_iter().map(Column::Property))
+        .collect()
 }
 
 fn property_value<'a>(
@@ -104,11 +108,5 @@ fn property_value<'a>(
         Property::Permissions => entry
             .permissions()
             .map(|p| format_permissions(p, options.permission_format).into()),
-    }
-}
-
-impl From<Property> for Column {
-    fn from(p: Property) -> Self {
-        Self::Property(p)
     }
 }
