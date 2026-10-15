@@ -95,6 +95,7 @@ fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<u
                     values.push(value);
                     width
                 })
+                .chain([col.header().width()])
                 .max()
                 .unwrap_or_default()
         })
