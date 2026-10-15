@@ -2,7 +2,7 @@
 
 use std::{os::unix::fs::PermissionsExt, time::SystemTime};
 
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, Duration, Utc};
 
 pub fn format_size(size: u64) -> String {
     let mut size = size as f64;
@@ -29,12 +29,9 @@ pub fn format_kind(kind: std::fs::FileType) -> &'static str {
     }
 }
 
-macro_rules! format_plural {
-    ($secs:expr, $unit:expr, $unit_str:expr) => {{
-        let count = $secs / $unit;
-        let plural = if count == 1 { "" } else { "s" };
-        format!("{} {}{} ago", count, $unit_str, plural)
-    }};
+fn format_plural(count: isize, unit_str: &str) -> String {
+    let plural = if count == 1 { "" } else { "s" };
+    format!("{} {}{} ago", count, unit_str, plural)
 }
 
 #[derive(Debug, Clone, Copy, Default)]
@@ -50,28 +47,20 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
         return time.format("%b%e %H:%M").to_string();
     }
 
-    let ago = match time.elapsed() {
-        Ok(elapsed) => elapsed.as_secs(),
-        Err(_) => return "unknown".to_string(),
-    };
+    let time = DateTime::from(time);
+    let passed = date_component::date_component::calculate(&time, &Utc::now());
 
-    const MINUTE: u64 = 60;
-    const HOUR: u64 = 60 * 60;
-    const DAY: u64 = HOUR * 24;
-    const WEEK: u64 = DAY * 7;
-    const MONTH: u64 = WEEK * 4;
-    // TODO: count years properly
-    const YEAR: u64 = MONTH * 12;
-
-    match ago {
-        0..MINUTE => "just now".to_string(),
-        MINUTE..HOUR => format_plural!(ago, MINUTE, "minute"),
-        HOUR..DAY => format_plural!(ago, HOUR, "hour"),
-        DAY..WEEK => format_plural!(ago, DAY, "day"),
-        WEEK..MONTH => format_plural!(ago, WEEK, "week"),
-        MONTH..YEAR => format_plural!(ago, MONTH, "month"),
-        YEAR.. => format_plural!(ago, YEAR, "year"),
-    }
+    [
+        (passed.year, "year"),
+        (passed.month, "month"),
+        (passed.day, "day"),
+        (passed.hour, "hour"),
+        (passed.minute, "minute"),
+    ]
+    .into_iter()
+    .find(|&(n, _)| n > 0)
+    .map(|(n, u)| format_plural(n, u))
+    .unwrap_or_else(|| "just now".to_string())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
