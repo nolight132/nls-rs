@@ -78,24 +78,37 @@ pub fn format_permissions(permissions: std::fs::Permissions, format: PermissionF
 }
 
 fn format_symbolic_permissions(permissions: std::fs::Permissions) -> String {
-    let mode = permissions.mode() & 0o777;
+    let mode = permissions.mode();
     let mut result = String::new();
 
-    result.push_str(&format_symbolic_permission(mode, 0o400, 'r'));
-    result.push_str(&format_symbolic_permission(mode, 0o200, 'w'));
-    result.push_str(&format_symbolic_permission(mode, 0o100, 'x'));
-    result.push_str(&format_symbolic_permission(mode, 0o040, 'r'));
-    result.push_str(&format_symbolic_permission(mode, 0o020, 'w'));
-    result.push_str(&format_symbolic_permission(mode, 0o010, 'x'));
-    result.push_str(&format_symbolic_permission(mode, 0o004, 'r'));
-    result.push_str(&format_symbolic_permission(mode, 0o002, 'w'));
-    result.push_str(&format_symbolic_permission(mode, 0o001, 'x'));
-    result
-}
+    let file_type = match mode & 0o170000 {
+        0o040000 => 'd',
+        0o120000 => 'l',
+        0o020000 => 'c',
+        0o060000 => 'b',
+        0o010000 => 'p',
+        0o140000 => 's',
+        _ => '-',
+    };
+    result.push(file_type);
 
-fn format_symbolic_permission(mode: u32, mask: u32, char: char) -> String {
-    match mode & mask {
-        0 => "-".to_string(),
-        _ => char.to_string(),
-    }
+    [
+        (0o400, 'r'),
+        (0o200, 'w'),
+        (0o100, 'x'),
+        (0o040, 'r'),
+        (0o020, 'w'),
+        (0o010, 'x'),
+        (0o004, 'r'),
+        (0o002, 'w'),
+        (0o001, 'x'),
+    ]
+    .into_iter()
+    .for_each(|(mask, char)| {
+        result.push(match mode & mask {
+            0 => '-',
+            _ => char,
+        });
+    });
+    result
 }
