@@ -8,11 +8,7 @@ use std::{
 
 use uzers::{Users, UsersCache};
 
-use crate::{
-    cli::Args,
-    config::{Config, Options},
-    format::{PermissionFormat, TimeFormat},
-};
+use crate::config::Options;
 
 #[derive(Debug)]
 pub struct Entry {
