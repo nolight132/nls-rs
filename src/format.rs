@@ -2,7 +2,7 @@
 
 use std::{os::unix::fs::PermissionsExt, time::SystemTime};
 
-use chrono::{DateTime, Duration, Utc};
+use chrono::{DateTime, Utc};
 
 pub fn format_size(size: u64) -> String {
     let mut size = size as f64;
