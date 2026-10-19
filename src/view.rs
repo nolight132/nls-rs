@@ -1,5 +1,7 @@
 use std::borrow::Cow;
 
+use unicode_width::UnicodeWidthStr;
+
 use crate::{
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
@@ -40,13 +42,17 @@ impl Column {
         entry: &'a Entry,
         row: usize,
         options: &Options,
-    ) -> Option<Cow<'a, str>> {
+    ) -> Option<(Cow<'a, str>, usize)> {
         match self {
             Column::Index => Some((row + 1).to_string().into()),
             Column::Property(property) => {
                 property_value(property, entry, options).map(|v| v.into())
             }
         }
+        .map(|v: Cow<'a, str>| {
+            let w = v.width();
+            (v, w)
+        })
     }
 
     pub fn property(&self) -> Option<Property> {

@@ -3,6 +3,7 @@ use clap::Parser;
 use crate::cli::handle;
 
 mod cli;
+mod color;
 mod config;
 mod format;
 mod list;

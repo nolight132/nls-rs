@@ -1,9 +1,14 @@
 use crate::{
+    color::{UIKind, color},
     config::Options,
     list::Property,
     view::{Column, Table},
 };
-use std::{borrow::Cow, fmt::Write, iter::repeat_n};
+use std::{
+    borrow::Cow,
+    fmt::{Display, Write},
+    iter::repeat_n,
+};
 use unicode_width::UnicodeWidthStr;
 
 const MISSING: &str = "-";
@@ -69,7 +74,7 @@ pub fn build_table(table: &Table, options: &Options) -> String {
     output
 }
 
-fn write_aligned(output: &mut String, value: &str, width: usize, alignment: Alignment) {
+fn write_aligned<D: Display>(output: &mut String, value: D, width: usize, alignment: Alignment) {
     match alignment {
         Alignment::Left => write!(output, "{:<width$}", value, width = width),
         Alignment::Center => write!(output, "{:^width$}", value, width = width),
@@ -90,8 +95,8 @@ fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<u
                 .iter()
                 .enumerate()
                 .map(|(j, entry)| {
-                    let value = col.value(entry, j, options).unwrap_or(MISSING.into());
-                    let width = value.width();
+                    let (value, width) =
+                        col.value(entry, j, options).unwrap_or((MISSING.into(), 1));
                     values.push(value);
                     width
                 })
