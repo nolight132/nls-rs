@@ -84,7 +84,7 @@ pub enum Property {
 }
 
 impl Property {
-    pub fn header(&self) -> &str {
+    pub fn header(&self) -> &'static str {
         match self {
             Property::Name => "name",
             Property::Kind => "kind",

@@ -1,9 +1,10 @@
 use crate::{
-    color::{UIKind, color},
+    color::{UIKind, colorize},
     config::Options,
     list::Property,
     view::{Column, Table},
 };
+use owo_colors::Styled;
 use std::{
     borrow::Cow,
     fmt::{Display, Write},
@@ -83,8 +84,8 @@ fn write_aligned<D: Display>(output: &mut String, value: D, width: usize, alignm
     .unwrap_or_default();
 }
 
-fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<usize>) {
-    let mut values: Vec<Cow<str>> = Vec::new();
+fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Styled<Cow<'a, str>>>, Vec<usize>) {
+    let mut values: Vec<Styled<Cow<str>>> = Vec::new();
 
     let table = table
         .columns()
@@ -95,12 +96,13 @@ fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Cow<'a, str>>, Vec<u
                 .iter()
                 .enumerate()
                 .map(|(j, entry)| {
-                    let (value, width) =
-                        col.value(entry, j, options).unwrap_or((MISSING.into(), 1));
+                    let (value, width) = col
+                        .value(entry, j, options)
+                        .unwrap_or((colorize(MISSING.into(), UIKind::Header), 1));
                     values.push(value);
                     width
                 })
-                .chain([col.header().width()])
+                .chain([col.header().inner().width()])
                 .max()
                 .unwrap_or_default()
         })

@@ -1,8 +1,10 @@
 use std::borrow::Cow;
 
+use owo_colors::Styled;
 use unicode_width::UnicodeWidthStr;
 
 use crate::{
+    color::{EntryKind, PropertyKind, UIKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
     list::{Entry, Property},
@@ -42,15 +44,13 @@ impl Column {
         entry: &'a Entry,
         row: usize,
         options: &Options,
-    ) -> Option<(Cow<'a, str>, usize)> {
+    ) -> Option<(Styled<Cow<'a, str>>, usize)> {
         match self {
-            Column::Index => Some((row + 1).to_string().into()),
-            Column::Property(property) => {
-                property_value(property, entry, options).map(|v| v.into())
-            }
+            Column::Index => Some(colorize((row + 1).to_string().into(), UIKind::Header)),
+            Column::Property(property) => property_value(property, entry, options).map(|v| v),
         }
-        .map(|v: Cow<'a, str>| {
-            let w = v.width();
+        .map(|v: Styled<Cow<'a, str>>| {
+            let w = v.inner().width();
             (v, w)
         })
     }
@@ -62,10 +62,10 @@ impl Column {
         }
     }
 
-    pub fn header(&self) -> &str {
+    pub fn header(&self) -> Styled<Cow<'static, str>> {
         match self {
-            Column::Index => "#",
-            Column::Property(property) => property.header(),
+            Column::Index => colorize("#".into(), UIKind::Header),
+            Column::Property(property) => colorize(property.header().into(), UIKind::Header),
         }
     }
 }
@@ -96,23 +96,44 @@ fn property_value<'a>(
     property: &Property,
     entry: &'a Entry,
     options: &Options,
-) -> Option<Cow<'a, str>> {
+) -> Option<Styled<Cow<'a, str>>> {
     match property {
-        Property::Name => Some(entry.name().into()),
-        Property::Kind => entry.kind().map(|k| format_kind(k).into()),
-        Property::Size => entry.size().map(|s| format_size(s).into()),
-        Property::AccessTime => entry
-            .access_time()
-            .map(|t| format_time(t, options.time_format).into()),
-        Property::ModifiedTime => entry
-            .modified_time()
-            .map(|t| format_time(t, options.time_format).into()),
-        Property::CreatedTime => entry
-            .created_time()
-            .map(|t| format_time(t, options.time_format).into()),
-        Property::Owner => entry.owner().map(|o| o.into()),
-        Property::Permissions => entry
-            .permissions()
-            .map(|p| format_permissions(p, options.permission_format).into()),
+        Property::Name => Some(colorize(
+            entry.name().into(),
+            UIKind::Entry(EntryKind::File),
+        )),
+        Property::Kind => entry
+            .kind()
+            .map(|k| colorize(format_kind(k).into(), UIKind::Property(PropertyKind::Kind))),
+        Property::Size => entry
+            .size()
+            .map(|s| colorize(format_size(s).into(), UIKind::Property(PropertyKind::Size))),
+        Property::AccessTime => entry.access_time().map(|t| {
+            colorize(
+                format_time(t, options.time_format).into(),
+                UIKind::Property(PropertyKind::AccessTime),
+            )
+        }),
+        Property::ModifiedTime => entry.modified_time().map(|t| {
+            colorize(
+                format_time(t, options.time_format).into(),
+                UIKind::Property(PropertyKind::ModifiedTime),
+            )
+        }),
+        Property::CreatedTime => entry.created_time().map(|t| {
+            colorize(
+                format_time(t, options.time_format).into(),
+                UIKind::Property(PropertyKind::CreatedTime),
+            )
+        }),
+        Property::Owner => entry
+            .owner()
+            .map(|o| colorize(o.into(), UIKind::Property(PropertyKind::Owner))),
+        Property::Permissions => entry.permissions().map(|p| {
+            colorize(
+                format_permissions(p, options.permission_format).into(),
+                UIKind::Property(PropertyKind::Permissions),
+            )
+        }),
     }
 }
