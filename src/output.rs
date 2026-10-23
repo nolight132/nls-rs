@@ -165,3 +165,17 @@ fn build_edge(table: &Table, widths: &[usize], edge: Edge) -> String {
 
     output
 }
+
+pub fn version() -> String {
+    format!(
+        r#"
+ _   _ _     ____
+| \ | | |   / ___|
+|  \| | |   \___ \
+|   | | |___ ___) |
+|   |_|_____|____/  by nolight132
+
+v{}"#,
+        env!("CARGO_PKG_VERSION")
+    )
+}

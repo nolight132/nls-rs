@@ -42,17 +42,7 @@ pub fn handle(args: &Args) {
     let options = Options::from(&args, &config);
 
     if options.version {
-        println!(
-            r#"
- _   _ _     ____
-| \ | | |   / ___|
-|  \| | |   \___ \
-|   | | |___ ___) |
-|   |_|_____|____/  by nolight132
-
-v{}"#,
-            env!("CARGO_PKG_VERSION")
-        );
+        println!("{}", output::version());
         return;
     }
 
