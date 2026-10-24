@@ -98,10 +98,16 @@ fn property_value<'a>(
     options: &Options,
 ) -> Option<Styled<Cow<'a, str>>> {
     match property {
-        Property::Name => Some(colorize(
-            entry.name().into(),
-            UIKind::Entry(EntryKind::File),
-        )),
+        Property::Name => {
+            let name = entry.name().into();
+            let kind = entry.kind();
+
+            if kind.is_some_and(|k| k.is_dir()) {
+                Some(colorize(name, UIKind::Entry(EntryKind::Directory)))
+            } else {
+                Some(colorize(name, UIKind::Entry(EntryKind::File)))
+            }
+        }
         Property::Kind => entry
             .kind()
             .map(|k| colorize(format_kind(k).into(), UIKind::Property(PropertyKind::Kind))),

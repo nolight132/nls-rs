@@ -37,6 +37,7 @@ fn format_plural(count: isize, unit: &str) -> String {
     }
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, Default)]
 pub enum TimeFormat {
     #[default]
@@ -66,6 +67,7 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
     .unwrap_or_else(|| "just now".to_string())
 }
 
+#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub enum PermissionFormat {
     Octal,
