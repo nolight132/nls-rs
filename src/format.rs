@@ -29,9 +29,12 @@ pub fn format_kind(kind: std::fs::FileType) -> &'static str {
     }
 }
 
-fn format_plural(count: isize, unit_str: &str) -> String {
-    let plural = if count == 1 { "" } else { "s" };
-    format!("{} {}{} ago", count, unit_str, plural)
+fn format_plural(count: isize, unit: &str) -> String {
+    if count == 1 {
+        format!("a {unit} ago")
+    } else {
+        format!("{count} {unit}s ago")
+    }
 }
 
 #[derive(Debug, Clone, Copy, Default)]
