@@ -6,6 +6,7 @@ mod cli;
 mod color;
 mod config;
 mod format;
+mod icons;
 mod list;
 mod output;
 mod view;

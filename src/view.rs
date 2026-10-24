@@ -7,6 +7,7 @@ use crate::{
     color::{EntryKind, PropertyKind, UIKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
+    icons,
     list::{Entry, Property},
 };
 
@@ -99,13 +100,21 @@ fn property_value<'a>(
 ) -> Option<Styled<Cow<'a, str>>> {
     match property {
         Property::Name => {
-            let name = entry.name().into();
+            let name = entry.name();
             let kind = entry.kind();
 
             if kind.is_some_and(|k| k.is_dir()) {
-                Some(colorize(name, UIKind::Entry(EntryKind::Directory)))
+                let icon = icons::dir_icon();
+                Some(colorize(
+                    format!("{icon} {name}", name = &name, icon = icon).into(),
+                    UIKind::Entry(EntryKind::Directory),
+                ))
             } else {
-                Some(colorize(name, UIKind::Entry(EntryKind::File)))
+                let icon = icons::get_icon(&name);
+                Some(colorize(
+                    format!("{icon} {name}", name = &name, icon = icon).into(),
+                    UIKind::Entry(EntryKind::File),
+                ))
             }
         }
         Property::Kind => entry
