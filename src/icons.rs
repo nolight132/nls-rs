@@ -262,7 +262,7 @@ const ICONS: &[(&'static str, &'static str)] = &[
     (".sql", "\u{e706}"),
 ];
 
-const DEFAULT: &'static str = "\u{f016}";
+const DEFAULT: &'static str = "\u{f15b}";
 
 pub fn get_icon(name: &str) -> &'static str {
     ICONS
