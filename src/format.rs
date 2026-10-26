@@ -49,7 +49,7 @@ pub enum TimeFormat {
 pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
     if let TimeFormat::Absolute = format {
         let time: DateTime<Utc> = time.into();
-        return time.format("%b%e %H:%M").to_string();
+        return time.format("%b %e %H:%M").to_string();
     }
 
     let time = DateTime::from(time);
