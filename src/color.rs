@@ -21,11 +21,11 @@ pub enum EntryKind {
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum PropertyKind {
     Size,         // cyan
-    Owner,        // bright black
-    Permissions,  // bright black
-    AccessTime,   // bright black
-    ModifiedTime, // bright black
-    CreatedTime,  // bright black
+    Owner,        // white
+    Permissions,  // white
+    AccessTime,   // magenta
+    ModifiedTime, // magenta
+    CreatedTime,  // magenta
     Kind,         // bright black
 }
 
