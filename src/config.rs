@@ -1,3 +1,4 @@
+use anyhow::{Context, Result};
 use std::{fs, path::PathBuf};
 
 use etcetera::{BaseStrategy, choose_base_strategy};
@@ -17,16 +18,25 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn load() -> Option<Self> {
-        let strategy = choose_base_strategy().ok()?;
+    pub fn load() -> Result<Self> {
+        let strategy = choose_base_strategy()
+            .ok()
+            .context("failed to choose base strategy")?;
         let path = PathBuf::from(strategy.config_dir())
             .join("nls")
             .join("config.toml");
-        let config = fs::read_to_string(path).ok()?;
+        let config = fs::read_to_string(&path)
+            .ok()
+            .context("failed to read config file")?;
+        let config = match toml::from_str(&config) {
+            Ok(c) => c,
+            Err(e) => {
+                eprintln!("{}", e);
+                return Err(anyhow::anyhow!("failed to parse {}", path.display()));
+            }
+        };
 
-        let config = toml::from_str(&config).ok()?;
-        println!("{:?}", config);
-        Some(config)
+        Some(config).with_context(|| format!("failed to parse {}", path.display()))
     }
 }
 

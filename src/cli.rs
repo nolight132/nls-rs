@@ -39,8 +39,8 @@ pub struct Args {
 
 pub fn handle(args: &Args) {
     let config = match Config::load() {
-        Some(c) => c,
-        None => Config::default(),
+        Ok(c) => c,
+        Err(_) => Config::default(),
     };
     let options = Options::from(&args, &config);
 
