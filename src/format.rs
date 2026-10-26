@@ -38,8 +38,8 @@ fn format_plural(count: isize, unit: &str) -> String {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum TimeFormat {
     #[default]
     Relative,
@@ -70,6 +70,7 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
 
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
 pub enum PermissionFormat {
     Octal,
     #[default]

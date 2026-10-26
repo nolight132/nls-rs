@@ -38,7 +38,10 @@ pub struct Args {
 }
 
 pub fn handle(args: &Args) {
-    let config = Config::default();
+    let config = match Config::load() {
+        Some(c) => c,
+        None => Config::default(),
+    };
     let options = Options::from(&args, &config);
 
     if options.version {

@@ -1,3 +1,6 @@
+use std::{fs, path::PathBuf};
+
+use etcetera::{BaseStrategy, choose_base_strategy};
 use serde::{Deserialize, Serialize};
 
 use crate::{
@@ -6,25 +9,36 @@ use crate::{
     list::Property,
 };
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct Config {
     pub format: FormatConfig,
     pub icons: IconsConfig,
 }
 
 impl Config {
-    pub fn load() -> Self {
-        todo!()
+    pub fn load() -> Option<Self> {
+        let strategy = choose_base_strategy().ok()?;
+        let path = PathBuf::from(strategy.config_dir())
+            .join("nls")
+            .join("config.toml");
+        let config = fs::read_to_string(path).ok()?;
+
+        let config = toml::from_str(&config).ok()?;
+        println!("{:?}", config);
+        Some(config)
     }
 }
 
-#[derive(Default, Serialize, Deserialize)]
+#[derive(Default, Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct FormatConfig {
-    pub permission_format: PermissionFormat,
-    pub time_format: TimeFormat,
+    pub permission: PermissionFormat,
+    pub time: TimeFormat,
 }
 
-#[derive(Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(default)]
 pub struct IconsConfig {
     pub enabled: bool,
 }
@@ -50,8 +64,8 @@ impl Options {
         Self {
             all: args.all,
             long: args.long || args.all,
-            time_format: config.format.time_format,
-            permission_format: config.format.permission_format,
+            time_format: config.format.time,
+            permission_format: config.format.permission,
             icons: config.icons.enabled,
             version: args.version,
         }
