@@ -103,26 +103,26 @@ fn property_value<'a>(
             let name = entry.name();
             let kind = entry.kind();
 
-            match kind.is_some_and(|k| k.is_dir()) {
-                true => {
-                    let icon = if options.icons { icons::dir_icon() } else { "" };
-                    Some(colorize(
-                        format!("{icon}{}", name).into(),
-                        UIKind::Entry(EntryKind::Directory),
-                    ))
-                }
-                false => {
-                    let icon = if options.icons {
-                        icons::get_icon(&name)
-                    } else {
-                        ""
-                    };
-                    Some(colorize(
-                        format!("{icon}{}", name).into(),
-                        UIKind::Entry(EntryKind::File),
-                    ))
-                }
-            }
+            let entry_kind = if kind.is_some_and(|k| k.is_dir()) {
+                EntryKind::Directory
+            } else {
+                EntryKind::File
+            };
+
+            let icon = if !options.icons {
+                ""
+            } else if kind.is_some_and(|k| k.is_dir()) {
+                icons::dir_icon()
+            } else if kind.is_some_and(|k| k.is_symlink()) {
+                icons::symlink_icon()
+            } else {
+                icons::get_icon(&name)
+            };
+
+            Some(colorize(
+                format!("{icon}{name}").into(),
+                UIKind::Entry(entry_kind),
+            ))
         }
         Property::Kind => entry
             .kind()

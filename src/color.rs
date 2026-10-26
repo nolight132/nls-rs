@@ -13,6 +13,7 @@ pub enum UIKind {
 pub enum EntryKind {
     File,
     Directory,
+    Symlink,
     GitUntracked, // bright green
     GitIgnored,   // bright black
     GitDirty,     // yellow
@@ -36,11 +37,12 @@ pub fn colorize<D: Display>(d: D, kind: UIKind) -> Styled<D> {
 fn style_for(kind: UIKind) -> Style {
     match kind {
         UIKind::Header => Style::new().blue().bold(),
+        UIKind::Entry(EntryKind::Directory) => Style::new().blue(),
+        UIKind::Entry(EntryKind::File) => Style::new(),
+        UIKind::Entry(EntryKind::Symlink) => Style::new(),
         UIKind::Entry(EntryKind::GitUntracked) => Style::new().bright_green(),
         UIKind::Entry(EntryKind::GitIgnored) => Style::new().bright_black(),
         UIKind::Entry(EntryKind::GitDirty) => Style::new().yellow(),
-        UIKind::Entry(EntryKind::Directory) => Style::new().blue(),
-        UIKind::Entry(EntryKind::File) => Style::new(),
         UIKind::Property(PropertyKind::Size) => Style::new().cyan(),
         UIKind::Property(PropertyKind::Permissions) => Style::new().white(),
         UIKind::Property(PropertyKind::Owner) => Style::new().white(),

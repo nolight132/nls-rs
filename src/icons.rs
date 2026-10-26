@@ -275,3 +275,7 @@ pub fn get_icon(name: &str) -> &'static str {
 pub fn dir_icon() -> &'static str {
     "\u{f07b} "
 }
+
+pub fn symlink_icon() -> &'static str {
+    "\u{f0c1} "
+}
