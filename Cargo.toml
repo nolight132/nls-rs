@@ -8,5 +8,7 @@ chrono = "0.4.45"
 clap = { version = "4.6.7", features = ["derive"] }
 date_component = "0.4.8"
 owo-colors = "4.4.0"
+serde = { version = "1.0.229", features = ["derive"] }
+toml = "1.1.8"
 unicode-width = "0.2.2"
 uzers = "0.12.2"
