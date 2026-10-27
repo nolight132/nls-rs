@@ -6,7 +6,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     cli::Args,
-    format::{PermissionFormat, TimeFormat},
+    format::{PermissionsFormat, TimeFormat},
     list::Property,
 };
 
@@ -43,7 +43,7 @@ impl Config {
 #[derive(Default, Debug, Serialize, Deserialize)]
 #[serde(default)]
 pub struct FormatConfig {
-    pub permission: PermissionFormat,
+    pub permissions: PermissionsFormat,
     pub time: TimeFormat,
 }
 
@@ -64,7 +64,7 @@ pub struct Options {
     pub all: bool,
     pub long: bool,
     pub time_format: TimeFormat,
-    pub permission_format: PermissionFormat,
+    pub permission_format: PermissionsFormat,
     pub icons: bool,
     pub version: bool,
 }
@@ -75,7 +75,7 @@ impl Options {
             all: args.all,
             long: args.long || args.all,
             time_format: config.format.time,
-            permission_format: config.format.permission,
+            permission_format: config.format.permissions,
             icons: config.icons.enabled,
             version: args.version,
         }

@@ -71,16 +71,16 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
 #[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
-pub enum PermissionFormat {
+pub enum PermissionsFormat {
     Octal,
     #[default]
     Symbolic,
 }
 
-pub fn format_permissions(permissions: std::fs::Permissions, format: PermissionFormat) -> String {
+pub fn format_permissions(permissions: std::fs::Permissions, format: PermissionsFormat) -> String {
     match format {
-        PermissionFormat::Octal => format!("{:o}", permissions.mode() & 0o777),
-        PermissionFormat::Symbolic => format_symbolic_permissions(permissions),
+        PermissionsFormat::Octal => format!("{:o}", permissions.mode() & 0o777),
+        PermissionsFormat::Symbolic => format_symbolic_permissions(permissions),
     }
 }
 
