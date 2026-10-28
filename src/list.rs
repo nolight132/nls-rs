@@ -105,10 +105,10 @@ pub fn stat_dir(
 ) -> std::io::Result<Vec<Entry>> {
     let cache = UsersCache::new();
 
+    let needs_metadata = options.needs_metadata(properties);
     let entries = filter_entries(std::fs::read_dir(path)?, options)?
         .into_iter()
         .map(|entry| {
-            let needs_metadata = options.needs_metadata(properties);
             let metadata = if needs_metadata {
                 Some(entry.metadata()?)
             } else {

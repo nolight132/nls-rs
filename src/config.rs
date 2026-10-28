@@ -83,6 +83,7 @@ impl Options {
 
     pub fn needs_metadata(&self, properties: &[Property]) -> bool {
         properties.contains(&Property::Size)
+            || properties.contains(&Property::Kind)
             || properties.contains(&Property::Permissions)
             || properties.contains(&Property::ModifiedTime)
             || properties.contains(&Property::AccessTime)
