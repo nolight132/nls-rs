@@ -68,7 +68,6 @@ pub fn format_time(time: SystemTime, format: TimeFormat) -> String {
     .unwrap_or_else(|| "just now".to_string())
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum PermissionsFormat {

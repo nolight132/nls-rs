@@ -87,7 +87,6 @@ impl Options {
             || properties.contains(&Property::ModifiedTime)
             || properties.contains(&Property::AccessTime)
             || properties.contains(&Property::CreatedTime)
-            || properties.contains(&Property::Kind)
             || properties.contains(&Property::Owner)
     }
 }

@@ -11,6 +11,8 @@ use crate::{
     list::{Entry, Property},
 };
 
+const MISSING: &str = "-";
+
 pub struct Table {
     columns: Vec<Column>,
     rows: Vec<Entry>,
@@ -45,15 +47,14 @@ impl Column {
         entry: &'a Entry,
         row: usize,
         options: &Options,
-    ) -> Option<(Styled<Cow<'a, str>>, usize)> {
-        match self {
-            Column::Index => Some(colorize((row + 1).to_string().into(), UIKind::Header)),
-            Column::Property(property) => property_value(property, entry, options).map(|v| v),
-        }
-        .map(|v: Styled<Cow<'a, str>>| {
-            let w = v.inner().width();
-            (v, w)
-        })
+    ) -> (Styled<Cow<'a, str>>, usize) {
+        let v = match self {
+            Column::Index => colorize((row + 1).to_string().into(), UIKind::Header),
+            Column::Property(property) => property_value(property, entry, options),
+        };
+
+        let w = v.inner().width();
+        (v, w)
     }
 
     pub fn property(&self) -> Option<Property> {
@@ -83,7 +84,7 @@ pub fn columns(options: &Options) -> Vec<Column> {
     // Property columns
     let mut props = vec![Name, Size, ModifiedTime];
     if options.long {
-        props.extend([Permissions, Owner]);
+        props.extend([Kind, Permissions, Owner]);
     }
 
     // Virtual columns
@@ -97,7 +98,7 @@ fn property_value<'a>(
     property: &Property,
     entry: &'a Entry,
     options: &Options,
-) -> Option<Styled<Cow<'a, str>>> {
+) -> Styled<Cow<'a, str>> {
     match property {
         Property::Name => {
             let name = entry.name();
@@ -158,4 +159,9 @@ fn property_value<'a>(
             )
         }),
     }
+    .unwrap_or_else(missing)
+}
+
+fn missing<'a>() -> Styled<Cow<'a, str>> {
+    colorize(MISSING.into(), UIKind::Header)
 }

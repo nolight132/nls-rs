@@ -1,5 +1,4 @@
 use crate::{
-    color::{UIKind, colorize},
     config::Options,
     list::Property,
     view::{Column, Table},
@@ -12,7 +11,6 @@ use std::{
 };
 use unicode_width::UnicodeWidthStr;
 
-const MISSING: &str = "-";
 const PADDING: usize = 1;
 
 const BORDER_TOP_LEFT: &str = "╭";
@@ -96,9 +94,7 @@ fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Styled<Cow<'a, str>>
                 .iter()
                 .enumerate()
                 .map(|(j, entry)| {
-                    let (value, width) = col
-                        .value(entry, j, options)
-                        .unwrap_or((colorize(MISSING.into(), UIKind::Header), 1));
+                    let (value, width) = col.value(entry, j, options);
                     values.push(value);
                     width
                 })
