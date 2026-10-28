@@ -4,7 +4,7 @@ use owo_colors::Styled;
 use unicode_width::UnicodeWidthStr;
 
 use crate::{
-    color::{EntryKind, PropertyKind, UIKind, colorize},
+    color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
     icons,
@@ -49,7 +49,7 @@ impl Column {
         options: &Options,
     ) -> (Styled<Cow<'a, str>>, usize) {
         let v = match self {
-            Column::Index => colorize((row + 1).to_string().into(), UIKind::Header),
+            Column::Index => colorize((row + 1).to_string().into(), ElementKind::Header),
             Column::Property(property) => property_value(property, entry, options),
         };
 
@@ -66,8 +66,8 @@ impl Column {
 
     pub fn header(&self) -> Styled<Cow<'static, str>> {
         match self {
-            Column::Index => colorize("#".into(), UIKind::Header),
-            Column::Property(property) => colorize(property.header().into(), UIKind::Header),
+            Column::Index => colorize("#".into(), ElementKind::Header),
+            Column::Property(property) => colorize(property.header().into(), ElementKind::Header),
         }
     }
 }
@@ -122,40 +122,46 @@ fn property_value<'a>(
 
             Some(colorize(
                 format!("{icon}{name}").into(),
-                UIKind::Entry(entry_kind),
+                ElementKind::Entry(entry_kind),
             ))
         }
-        Property::Kind => entry
-            .kind()
-            .map(|k| colorize(format_kind(k).into(), UIKind::Property(PropertyKind::Kind))),
-        Property::Size => entry
-            .size()
-            .map(|s| colorize(format_size(s).into(), UIKind::Property(PropertyKind::Size))),
+        Property::Kind => entry.kind().map(|k| {
+            colorize(
+                format_kind(k).into(),
+                ElementKind::Property(PropertyKind::Kind),
+            )
+        }),
+        Property::Size => entry.size().map(|s| {
+            colorize(
+                format_size(s).into(),
+                ElementKind::Property(PropertyKind::Size),
+            )
+        }),
         Property::AccessTime => entry.access_time().map(|t| {
             colorize(
                 format_time(t, options.time_format).into(),
-                UIKind::Property(PropertyKind::AccessTime),
+                ElementKind::Property(PropertyKind::AccessTime),
             )
         }),
         Property::ModifiedTime => entry.modified_time().map(|t| {
             colorize(
                 format_time(t, options.time_format).into(),
-                UIKind::Property(PropertyKind::ModifiedTime),
+                ElementKind::Property(PropertyKind::ModifiedTime),
             )
         }),
         Property::CreatedTime => entry.created_time().map(|t| {
             colorize(
                 format_time(t, options.time_format).into(),
-                UIKind::Property(PropertyKind::CreatedTime),
+                ElementKind::Property(PropertyKind::CreatedTime),
             )
         }),
         Property::Owner => entry
             .owner()
-            .map(|o| colorize(o.into(), UIKind::Property(PropertyKind::Owner))),
+            .map(|o| colorize(o.into(), ElementKind::Property(PropertyKind::Owner))),
         Property::Permissions => entry.permissions().map(|p| {
             colorize(
                 format_permissions(p, options.permission_format).into(),
-                UIKind::Property(PropertyKind::Permissions),
+                ElementKind::Property(PropertyKind::Permissions),
             )
         }),
     }
@@ -163,5 +169,5 @@ fn property_value<'a>(
 }
 
 fn missing<'a>() -> Styled<Cow<'a, str>> {
-    colorize(MISSING.into(), UIKind::Header)
+    colorize(MISSING.into(), ElementKind::Header)
 }
