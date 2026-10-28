@@ -128,7 +128,7 @@ fn property_value<'a>(
         Property::Kind => entry.kind().map(|k| {
             colorize(
                 format_kind(k).into(),
-                ElementKind::Property(PropertyKind::Kind),
+                ElementKind::Property(PropertyKind::Type),
             )
         }),
         Property::Size => entry.size().map(|s| {

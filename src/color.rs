@@ -27,7 +27,7 @@ pub enum PropertyKind {
     AccessTime,   // magenta
     ModifiedTime, // magenta
     CreatedTime,  // magenta
-    Kind,         // bright black
+    Type,         // bright black
 }
 
 pub fn colorize<D: Display>(d: D, kind: ElementKind) -> Styled<D> {
@@ -46,7 +46,7 @@ fn style_for(kind: ElementKind) -> Style {
         ElementKind::Property(PropertyKind::Size) => Style::new().cyan(),
         ElementKind::Property(PropertyKind::Permissions) => Style::new().white(),
         ElementKind::Property(PropertyKind::Owner) => Style::new().white(),
-        ElementKind::Property(PropertyKind::Kind) => Style::new().bright_black(),
+        ElementKind::Property(PropertyKind::Type) => Style::new().white(),
         ElementKind::Property(PropertyKind::CreatedTime) => Style::new().magenta(),
         ElementKind::Property(PropertyKind::AccessTime) => Style::new().magenta(),
         ElementKind::Property(PropertyKind::ModifiedTime) => Style::new().magenta(),

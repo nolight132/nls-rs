@@ -87,7 +87,7 @@ impl Property {
     pub fn header(&self) -> &'static str {
         match self {
             Property::Name => "name",
-            Property::Kind => "kind",
+            Property::Kind => "type",
             Property::Size => "size",
             Property::Permissions => "permissions",
             Property::AccessTime => "access",
