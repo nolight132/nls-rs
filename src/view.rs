@@ -113,17 +113,21 @@ fn property_value<'a>(
             let name = entry.name();
             let kind = entry.kind();
             let git: Option<&GitStatus> = git
-                .map(|g| g.get(entry.path().strip_prefix(".").unwrap()))
+                .map(|g| {
+                    let path = entry.path();
+                    dbg!(path.strip_prefix(".").unwrap_or(path));
+                    g.get(path.strip_prefix(".").unwrap_or(path))
+                })
                 .flatten();
             let git_status = parse_git_status(git);
 
-            let entry_kind = if git_status.is_some() {
-                git_status.unwrap()
-            } else if kind.is_some_and(|k| k.is_dir()) {
-                EntryKind::Directory
-            } else {
-                EntryKind::File
-            };
+            let entry_kind = git_status.unwrap_or_else(|| {
+                if kind.is_some_and(|k| k.is_dir()) {
+                    EntryKind::Directory
+                } else {
+                    EntryKind::File
+                }
+            });
 
             let icon = if !options.icons {
                 ""
@@ -195,6 +199,8 @@ fn parse_git_status(status: Option<&GitStatus>) -> Option<EntryKind> {
             Some(EntryKind::GitDirty)
         } else if s.is_ignored() {
             Some(EntryKind::GitIgnored)
+        } else if s.is_deleted() {
+            Some(EntryKind::GitDeleted)
         } else {
             None
         }

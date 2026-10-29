@@ -112,7 +112,8 @@ pub fn stat_dir(
     let cache = UsersCache::new();
 
     let needs_metadata = options.needs_metadata(properties);
-    let entries = filter_entries(std::fs::read_dir(path)?, options)?
+    let path = path.canonicalize()?;
+    let entries = filter_entries(std::fs::read_dir(&path)?, options)?
         .into_iter()
         .map(|entry| {
             let metadata = if needs_metadata {
