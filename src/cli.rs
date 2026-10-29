@@ -3,6 +3,7 @@ use std::path::PathBuf;
 
 use crate::{
     config::{Config, Options},
+    git::GitStatuses,
     list::{Property, stat_dir},
     output,
     view::{Column, Table, columns},
@@ -49,8 +50,9 @@ pub fn handle(args: &Args) {
         return;
     }
 
-    let columns: Vec<Column> = columns(&options);
+    let columns = columns(&options);
     let properties: Vec<Property> = columns.iter().filter_map(Column::property).collect();
+    let git = GitStatuses::collect(&args.path);
     let entries = match stat_dir(&args.path, &properties, &options) {
         Ok(entries) => entries,
         Err(e) => {
@@ -58,7 +60,7 @@ pub fn handle(args: &Args) {
             return;
         }
     };
-    let table = Table::new(entries, columns);
+    let table = Table::new(entries, columns, git);
 
     println!("{}", output::build_table(&table, &options));
 }

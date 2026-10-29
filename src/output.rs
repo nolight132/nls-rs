@@ -94,7 +94,7 @@ fn prepare<'a>(table: &'a Table, options: &Options) -> (Vec<Styled<Cow<'a, str>>
                 .iter()
                 .enumerate()
                 .map(|(j, entry)| {
-                    let (value, width) = col.value(entry, j, options);
+                    let (value, width) = col.value(entry, j, options, table.git());
                     values.push(value);
                     width
                 })
