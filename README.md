@@ -2,8 +2,27 @@
 
 # nls
 
+[![License](https://img.shields.io/github/license/nolight132/nls-rs)](./LICENSE)
+
 ### neo-ls: a modern `ls` with useful tables
+
+A fast, cross-platform file listing tool that feels familiar in scripts
+and looks beautiful in your terminal.
+
+`nls` is heavily inspired by [Nushell](https://github.com/nushell)'s `ls`.
 </div>
+
+<div align="center">
+    <img width="837" height="622" alt="image" src="https://github.com/user-attachments/assets/a2d364a4-049c-4815-8cbb-54fa499e8cec" />
+</div>
+<div align="center">
+    <sub>
+      A more Nushell-like configuration is available in
+      <a href="./examples/config.nushell.toml"><code>config.nushell.toml</code></a>.
+    </sub>
+</div>
+
+---
 
 > [!NOTE]
 > This is an ongoing Rust rewrite of [nls](https://github.com/nolight132/nls).
