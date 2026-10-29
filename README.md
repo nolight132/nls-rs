@@ -3,6 +3,7 @@
 # nls
 
 ### neo-ls: a modern `ls` with useful tables
+
 </div>
 
 > [!NOTE]
