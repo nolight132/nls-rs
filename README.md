@@ -16,7 +16,7 @@
 A fast, cross-platform file listing tool that feels familiar in scripts
 and looks beautiful in your terminal.
 
-`nls` is heavily inspired by [Nushell](https://github.com/nushell)'s `ls`.
+`nls` is heavily inspired by [Nushell]([https://github.com/nushell](https://www.nushell.sh/))'s `ls`.
 </div>
 
 <div align="center">
