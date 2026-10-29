@@ -7,7 +7,7 @@ use crate::{
     color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
-    git::{GitStatus, GitStatuses, ModifiedType, WorktreeStatus},
+    git::{GitStatus, GitStatuses, WorktreeStatus},
     icons,
     list::{Entry, Property},
 };
@@ -112,18 +112,13 @@ fn property_value<'a>(
         Property::Name => {
             let name = entry.name();
             let kind = entry.kind();
-            let git = git.unwrap().get(entry.path().strip_prefix(".").unwrap());
+            let git: Option<&GitStatus> = git
+                .map(|g| g.get(entry.path().strip_prefix(".").unwrap()))
+                .flatten();
+            let git_status = parse_git_status(git);
 
-            let entry_kind = if git.is_some_and(|g| {
-                matches!(
-                    g,
-                    GitStatus {
-                        worktree: WorktreeStatus::Dirty,
-                        ..
-                    }
-                )
-            }) {
-                EntryKind::GitDirty
+            let entry_kind = if git_status.is_some() {
+                git_status.unwrap()
             } else if kind.is_some_and(|k| k.is_dir()) {
                 EntryKind::Directory
             } else {
@@ -190,4 +185,20 @@ fn property_value<'a>(
 
 fn missing<'a>() -> Styled<Cow<'a, str>> {
     colorize(MISSING.into(), ElementKind::Header)
+}
+
+fn parse_git_status(status: Option<&GitStatus>) -> Option<EntryKind> {
+    if let Some(s) = status {
+        if s.is_untracked() {
+            Some(EntryKind::GitUntracked)
+        } else if s.is_dirty() {
+            Some(EntryKind::GitDirty)
+        } else if s.is_ignored() {
+            Some(EntryKind::GitIgnored)
+        } else {
+            None
+        }
+    } else {
+        None
+    }
 }

@@ -2,35 +2,28 @@ use std::path::{Path, PathBuf};
 
 use std::collections::HashMap;
 
-use git2::Statuses;
+use git2::{Status, StatusEntry, Statuses};
 
 pub struct GitStatuses(HashMap<PathBuf, GitStatus>);
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GitStatus {
-    pub worktree: WorktreeStatus,
-    pub index: IndexStatus,
+    worktree: WorktreeStatus,
+    index: IndexStatus,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WorktreeStatus {
     Clean,
-    Dirty,
+    Modified,
+    Untracked,
     Ignored,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IndexStatus {
     Clean,
-    Dirty,
-    Untracked,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ModifiedType {
-    Index,
-    Worktree,
-    Both,
+    Modified,
 }
 
 impl GitStatuses {
@@ -58,15 +51,48 @@ impl From<Statuses<'_>> for GitStatuses {
 
         st.into_iter().fold(Self(statuses), |mut acc, s| {
             let path = PathBuf::from(s.path().unwrap());
-            dbg!(&path);
-            acc.0.insert(
-                path,
-                GitStatus {
-                    worktree: WorktreeStatus::Dirty,
-                    index: IndexStatus::Clean,
-                },
-            );
+            acc.0.insert(path, (&s).into());
             acc
         })
+    }
+}
+
+impl GitStatus {
+    pub fn worktree(&self) -> &WorktreeStatus {
+        &self.worktree
+    }
+
+    pub fn index(&self) -> &IndexStatus {
+        &self.index
+    }
+
+    pub fn is_dirty(&self) -> bool {
+        matches!(self.worktree, WorktreeStatus::Modified)
+    }
+
+    pub fn is_untracked(&self) -> bool {
+        matches!(self.worktree, WorktreeStatus::Untracked)
+    }
+
+    pub fn is_ignored(&self) -> bool {
+        matches!(self.worktree, WorktreeStatus::Ignored)
+    }
+}
+
+impl From<&StatusEntry<'_>> for GitStatus {
+    fn from(s: &StatusEntry<'_>) -> Self {
+        let worktree = if s.status().is_wt_new() {
+            WorktreeStatus::Untracked
+        } else if s.status().is_wt_modified() {
+            WorktreeStatus::Modified
+        } else if s.status().is_ignored() {
+            WorktreeStatus::Ignored
+        } else {
+            WorktreeStatus::Clean
+        };
+        Self {
+            worktree,
+            index: IndexStatus::Clean,
+        }
     }
 }
