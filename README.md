@@ -1,3 +1,10 @@
+> [!NOTE]
+> This is an ongoing Rust rewrite of [nls](https://github.com/nolight132/nls).
+> It exists mostly to prevent my brain from dissolving in the age of AI, so
+> every line here is written by me. I work on it from time to time. The plan
+> is to eventually replace nls with this Rust implementation, so this repo
+> is basically doomed.
+
 <div align="center">
 
 # nls
@@ -24,12 +31,6 @@ and looks beautiful in your terminal.
 
 ---
 
-> [!NOTE]
-> This is an ongoing Rust rewrite of [nls](https://github.com/nolight132/nls).
-> It exists mostly to prevent my brain from dissolving in the age of AI, so
-> every line here is written by me. I work on it from time to time. The plan
-> is to eventually replace nls with this Rust implementation, so this repo
-> is basically doomed.
 
 ## Why nls?
 
