@@ -2,7 +2,7 @@ use std::{
     fs::{self, DirEntry, ReadDir},
     io,
     os::unix::fs::MetadataExt,
-    path::Path,
+    path::{Path, PathBuf},
     time::UNIX_EPOCH,
 };
 
@@ -13,6 +13,7 @@ use crate::config::Options;
 #[derive(Debug)]
 pub struct Entry {
     name: String,
+    path: PathBuf,
     kind: Option<fs::FileType>,
     size: Option<u64>,
     permissions: Option<fs::Permissions>,
@@ -25,6 +26,7 @@ pub struct Entry {
 impl Entry {
     pub fn new(
         name: String,
+        path: PathBuf,
         kind: Option<fs::FileType>,
         size: Option<u64>,
         permissions: Option<fs::Permissions>,
@@ -35,6 +37,7 @@ impl Entry {
     ) -> Self {
         Self {
             name,
+            path,
             kind,
             size,
             permissions,
@@ -47,6 +50,9 @@ impl Entry {
 
     pub fn name(&self) -> &str {
         self.name.as_str()
+    }
+    pub fn path(&self) -> &Path {
+        self.path.as_path()
     }
     pub fn kind(&self) -> Option<fs::FileType> {
         self.kind
@@ -116,6 +122,7 @@ pub fn stat_dir(
             };
             Ok(Entry::new(
                 entry.file_name().to_string_lossy().into_owned(),
+                entry.path(),
                 metadata.as_ref().map(|m| m.file_type()),
                 metadata.as_ref().map(|m| m.size()),
                 metadata.as_ref().map(|m| m.permissions()),

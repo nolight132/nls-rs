@@ -7,6 +7,7 @@ use crate::{
     color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
+    git::{GitStatus, GitStatuses, ModifiedType, WorktreeStatus},
     icons,
     list::{Entry, Property},
 };
@@ -16,13 +17,15 @@ const MISSING: &str = "-";
 pub struct Table {
     columns: Vec<Column>,
     rows: Vec<Entry>,
+    git: Option<GitStatuses>,
 }
 
 impl Table {
-    pub fn new(entries: Vec<Entry>, columns: Vec<Column>) -> Self {
+    pub fn new(entries: Vec<Entry>, columns: Vec<Column>, git: Option<GitStatuses>) -> Self {
         Self {
             columns,
             rows: entries,
+            git,
         }
     }
 
@@ -32,6 +35,10 @@ impl Table {
 
     pub fn rows(&self) -> &[Entry] {
         &self.rows
+    }
+
+    pub fn git(&self) -> Option<&GitStatuses> {
+        self.git.as_ref()
     }
 }
 
@@ -47,10 +54,11 @@ impl Column {
         entry: &'a Entry,
         row: usize,
         options: &Options,
+        git: Option<&GitStatuses>,
     ) -> (Styled<Cow<'a, str>>, usize) {
         let v = match self {
             Column::Index => colorize((row + 1).to_string().into(), ElementKind::Header),
-            Column::Property(property) => property_value(property, entry, options),
+            Column::Property(property) => property_value(property, entry, options, git),
         };
 
         let w = v.inner().width();
@@ -98,13 +106,25 @@ fn property_value<'a>(
     property: &Property,
     entry: &'a Entry,
     options: &Options,
+    git: Option<&GitStatuses>,
 ) -> Styled<Cow<'a, str>> {
     match property {
         Property::Name => {
             let name = entry.name();
             let kind = entry.kind();
+            let git = git.unwrap().get(entry.path().strip_prefix(".").unwrap());
 
-            let entry_kind = if kind.is_some_and(|k| k.is_dir()) {
+            let entry_kind = if git.is_some_and(|g| {
+                matches!(
+                    g,
+                    GitStatus {
+                        worktree: WorktreeStatus::Dirty,
+                        ..
+                    }
+                )
+            }) {
+                EntryKind::GitDirty
+            } else if kind.is_some_and(|k| k.is_dir()) {
                 EntryKind::Directory
             } else {
                 EntryKind::File

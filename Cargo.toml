@@ -9,8 +9,16 @@ chrono = "0.4.45"
 clap = { version = "4.6.7", features = ["derive"] }
 date_component = "0.4.8"
 etcetera = "0.11.0"
+git2 = "0.21.0"
 owo-colors = "4.4.0"
 serde = { version = "1.0.229", features = ["derive"] }
 toml = "1.1.8"
 unicode-width = "0.2.2"
 uzers = "0.12.2"
+
+[profile.release]
+lto = true
+strip = true
+opt-level = 3
+codegen-units = 1
+panic = "abort"

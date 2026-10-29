@@ -8,7 +8,6 @@ pub enum ElementKind {
     Entry(EntryKind),
 }
 
-#[allow(dead_code)]
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum EntryKind {
     File,
