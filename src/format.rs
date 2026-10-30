@@ -1,9 +1,8 @@
 //! Utility module providing functions for formatting file system data.
 
-use std::{os::unix::fs::PermissionsExt, time::SystemTime};
-
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::{os::unix::fs::PermissionsExt, time::SystemTime};
 
 pub fn format_size(size: u64) -> String {
     let mut size = size as f64;

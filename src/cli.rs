@@ -1,6 +1,3 @@
-use clap::Parser;
-use std::path::PathBuf;
-
 use crate::{
     config::{Config, Options},
     git::GitStatuses,
@@ -8,6 +5,8 @@ use crate::{
     output,
     view::{Column, Table, columns},
 };
+use clap::Parser;
+use std::path::PathBuf;
 
 /// Simple program to list files
 #[derive(Parser, Debug)]

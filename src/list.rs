@@ -1,3 +1,4 @@
+use crate::config::Options;
 use std::{
     fs::{self, DirEntry, ReadDir},
     io,
@@ -5,10 +6,7 @@ use std::{
     path::{Path, PathBuf},
     time::UNIX_EPOCH,
 };
-
 use uzers::{Users, UsersCache};
-
-use crate::config::Options;
 
 #[derive(Debug)]
 pub struct Entry {

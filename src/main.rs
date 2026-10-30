@@ -1,6 +1,5 @@
-use clap::Parser;
-
 use crate::cli::handle;
+use clap::Parser;
 
 mod cli;
 mod color;

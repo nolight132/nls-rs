@@ -1,8 +1,6 @@
-use std::path::{Path, PathBuf};
-
-use std::collections::HashMap;
-
 use git2::{StatusEntry, Statuses};
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 pub struct GitStatuses(HashMap<PathBuf, GitStatus>);
 

@@ -1,14 +1,12 @@
-use anyhow::{Context, Result};
-use std::{fs, path::PathBuf};
-
-use etcetera::{BaseStrategy, choose_base_strategy};
-use serde::{Deserialize, Serialize};
-
 use crate::{
     cli::Args,
     format::{PermissionsFormat, TimeFormat},
     list::Property,
 };
+use anyhow::{Context, Result};
+use etcetera::{BaseStrategy, choose_base_strategy};
+use serde::{Deserialize, Serialize};
+use std::{fs, path::PathBuf};
 
 #[derive(Default, Debug, Serialize, Deserialize)]
 #[serde(default)]

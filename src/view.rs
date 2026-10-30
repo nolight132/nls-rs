@@ -1,8 +1,3 @@
-use std::borrow::Cow;
-
-use owo_colors::Styled;
-use unicode_width::UnicodeWidthStr;
-
 use crate::{
     color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
@@ -11,6 +6,9 @@ use crate::{
     icons,
     list::{Entry, Property},
 };
+use owo_colors::Styled;
+use std::borrow::Cow;
+use unicode_width::UnicodeWidthStr;
 
 const MISSING: &str = "-";
 
