@@ -61,5 +61,5 @@ pub fn handle(args: &Args) {
     };
     let table = Table::new(entries, columns, git);
 
-    println!("{}", output::build_table(&table, &options));
+    print!("{}", output::build_table(&table, &options));
 }
