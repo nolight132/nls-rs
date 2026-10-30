@@ -31,7 +31,6 @@ and looks beautiful in your terminal.
 
 ---
 
-
 ## Why nls?
 
 `nls` is a **neo-ls**: a modern file listing command built around beautiful tables, compatibility in pipes and scripts, and useful defaults like directory sizes without slowing normal usage.
