@@ -2,8 +2,7 @@ use std::path::{Path, PathBuf};
 
 use std::collections::HashMap;
 
-use git2::ErrorClass::Worktree;
-use git2::{Status, StatusEntry, Statuses};
+use git2::{StatusEntry, Statuses};
 
 pub struct GitStatuses(HashMap<PathBuf, GitStatus>);
 
@@ -22,6 +21,8 @@ pub enum WorktreeStatus {
     Deleted,
 }
 
+// TODO: use
+#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IndexStatus {
     Clean,

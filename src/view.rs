@@ -7,7 +7,7 @@ use crate::{
     color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
-    git::{GitStatus, GitStatuses, WorktreeStatus},
+    git::{GitStatus, GitStatuses},
     icons,
     list::{Entry, Property},
 };
