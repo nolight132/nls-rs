@@ -12,10 +12,10 @@ pub enum ElementKind {
 pub enum EntryKind {
     File,
     Directory,
-    Symlink,
     GitUntracked, // bright green
     GitIgnored,   // bright black
     GitDirty,     // yellow
+    GitDeleted,   // bright red
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -38,10 +38,10 @@ fn style_for(kind: ElementKind) -> Style {
         ElementKind::Header => Style::new().blue().bold(),
         ElementKind::Entry(EntryKind::Directory) => Style::new().blue(),
         ElementKind::Entry(EntryKind::File) => Style::new(),
-        ElementKind::Entry(EntryKind::Symlink) => Style::new(),
         ElementKind::Entry(EntryKind::GitUntracked) => Style::new().bright_green(),
         ElementKind::Entry(EntryKind::GitIgnored) => Style::new().bright_black(),
         ElementKind::Entry(EntryKind::GitDirty) => Style::new().yellow(),
+        ElementKind::Entry(EntryKind::GitDeleted) => Style::new().red(),
         ElementKind::Property(PropertyKind::Size) => Style::new().cyan(),
         ElementKind::Property(PropertyKind::Permissions) => Style::new().white(),
         ElementKind::Property(PropertyKind::Owner) => Style::new().white(),
