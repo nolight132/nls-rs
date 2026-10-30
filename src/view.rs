@@ -113,7 +113,6 @@ fn property_value<'a>(
             let git: Option<&GitStatus> = git
                 .map(|g| {
                     let path = entry.path();
-                    dbg!(path.strip_prefix(".").unwrap_or(path));
                     g.get(path.strip_prefix(".").unwrap_or(path))
                 })
                 .flatten();
