@@ -19,12 +19,11 @@ pub enum WorktreeStatus {
     Deleted,
 }
 
-// TODO: use
-#[allow(dead_code)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum IndexStatus {
     Clean,
     Modified,
+    Added,
     Deleted,
 }
 
@@ -52,7 +51,7 @@ impl GitStatuses {
     fn from_statuses(st: Statuses, root: &Path) -> Self {
         let statuses = HashMap::default();
 
-        st.into_iter().fold(Self(statuses), |mut acc, s| {
+        st.iter().fold(Self(statuses), |mut acc, s| {
             if let Ok(path) = s.path() {
                 let path = root.join(PathBuf::from(path));
                 let status: GitStatus = (&s).into();
@@ -71,40 +70,40 @@ impl GitStatuses {
 }
 
 impl GitStatus {
-    pub fn is_dirty(&self) -> bool {
-        matches!(self.worktree, WorktreeStatus::Modified)
+    pub fn worktree(&self) -> &WorktreeStatus {
+        &self.worktree
     }
 
-    pub fn is_untracked(&self) -> bool {
-        matches!(self.worktree, WorktreeStatus::Untracked)
-    }
-
-    pub fn is_ignored(&self) -> bool {
-        matches!(self.worktree, WorktreeStatus::Ignored)
-    }
-
-    pub fn is_deleted(&self) -> bool {
-        matches!(self.worktree, WorktreeStatus::Deleted)
+    pub fn index(&self) -> &IndexStatus {
+        &self.index
     }
 }
 
 impl From<&StatusEntry<'_>> for GitStatus {
     fn from(s: &StatusEntry<'_>) -> Self {
-        let worktree = if s.status().is_wt_new() {
+        let s = s.status();
+        let worktree = if s.is_wt_new() {
             WorktreeStatus::Untracked
-        } else if s.status().is_wt_modified() {
+        } else if s.is_wt_modified() {
             WorktreeStatus::Modified
-        } else if s.status().is_ignored() {
+        } else if s.is_ignored() {
             WorktreeStatus::Ignored
-        } else if s.status().is_wt_deleted() {
+        } else if s.is_wt_deleted() {
             WorktreeStatus::Deleted
         } else {
             WorktreeStatus::Clean
         };
-        Self {
-            worktree,
-            // TODO: handle index status
-            index: IndexStatus::Clean,
-        }
+
+        let index = if s.is_index_modified() {
+            IndexStatus::Modified
+        } else if s.is_index_new() {
+            IndexStatus::Added
+        } else if s.is_index_deleted() {
+            IndexStatus::Deleted
+        } else {
+            IndexStatus::Clean
+        };
+
+        Self { worktree, index }
     }
 }

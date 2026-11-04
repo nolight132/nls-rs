@@ -2,7 +2,7 @@ use crate::{
     color::{ElementKind, EntryKind, PropertyKind, colorize},
     config::Options,
     format::{format_kind, format_permissions, format_size, format_time},
-    git::{GitStatus, GitStatuses},
+    git::{GitStatus, GitStatuses, IndexStatus, WorktreeStatus},
     icons,
     list::{Entry, Property},
 };
@@ -52,7 +52,7 @@ impl Column {
         entry: &'a Entry,
         row: usize,
         options: &Options,
-        git: Option<&GitStatuses>,
+        git: Option<&GitStatus>,
     ) -> (Styled<Cow<'a, str>>, usize) {
         let v = match self {
             Column::Index => colorize((row + 1).to_string().into(), ElementKind::Header),
@@ -104,18 +104,12 @@ fn property_value<'a>(
     property: &Property,
     entry: &'a Entry,
     options: &Options,
-    git: Option<&GitStatuses>,
+    git: Option<&GitStatus>,
 ) -> Styled<Cow<'a, str>> {
     match property {
         Property::Name => {
             let name = entry.name();
             let kind = entry.kind();
-            let git: Option<&GitStatus> = git
-                .map(|g| {
-                    let path = entry.path();
-                    g.get(path.strip_prefix(".").unwrap_or(path))
-                })
-                .flatten();
             let git_status = parse_git_status(git);
 
             let entry_kind = git_status.unwrap_or_else(|| {
@@ -189,19 +183,13 @@ fn missing<'a>() -> Styled<Cow<'a, str>> {
 }
 
 fn parse_git_status(status: Option<&GitStatus>) -> Option<EntryKind> {
-    if let Some(s) = status {
-        if s.is_untracked() {
-            Some(EntryKind::GitUntracked)
-        } else if s.is_dirty() {
-            Some(EntryKind::GitDirty)
-        } else if s.is_ignored() {
-            Some(EntryKind::GitIgnored)
-        } else if s.is_deleted() {
-            Some(EntryKind::GitDeleted)
-        } else {
-            None
-        }
-    } else {
-        None
+    let s = status?;
+
+    match (s.worktree(), s.index()) {
+        (WorktreeStatus::Deleted, _) | (_, IndexStatus::Deleted) => Some(EntryKind::GitDeleted),
+        (WorktreeStatus::Untracked, _) | (_, IndexStatus::Added) => Some(EntryKind::GitUntracked),
+        (WorktreeStatus::Ignored, _) => Some(EntryKind::GitIgnored),
+        (WorktreeStatus::Modified, _) | (_, IndexStatus::Modified) => Some(EntryKind::GitDirty),
+        _ => None,
     }
 }
