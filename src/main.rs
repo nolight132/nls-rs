@@ -1,4 +1,3 @@
-use crate::cli::handle;
 use clap::Parser;
 
 mod cli;
@@ -13,5 +12,5 @@ mod view;
 
 fn main() {
     let args = cli::Args::parse();
-    handle(&args);
+    cli::run(&args);
 }

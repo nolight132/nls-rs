@@ -37,7 +37,7 @@ pub struct Args {
     pub version: bool,
 }
 
-pub fn handle(args: &Args) {
+pub fn run(args: &Args) {
     let config = match Config::load() {
         Ok(c) => c,
         Err(_) => Config::default(),
